@@ -4,75 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>明代婉约风五言绝句生成</title>
-    <style>
-        body {
-            font-family: 'SimSun', serif;
-            background-image: url('xuanzhi.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            color: #551a8b;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        input {
-            width: 200px;
-            height: 35px;
-            margin: 10px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            padding: 0 10px;
-            font-size: 1em;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-
-        button {
-            width: 100px;
-            height: 40px;
-            border: none;
-            border-radius: 50%;
-            background-color: #800080;
-            color: white;
-            font-size: 1.2em;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #9932CC;
-        }
-
-        p.poem {
-            font-family: 'KaiTi', serif;
-            font-size: 1.5em;
-            margin: 20px 0;
-            text-align: center;
-            color: #551a8b;
-        }
-
-        footer {
-            margin-top: 20px;
-            color: #999;
-        }
-    </style>
+    <title>个人简历</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <h1>古韵诗风——明代婉约风五言绝句生成</h1>
-    <input type="text" placeholder="关键词1">
-    <input type="text" placeholder="关键词2">
-    <input type="text" placeholder="关键词3">
-    <button id="generateButton">生成</button>
-    <p class
+    <!-- 顶部导航栏 -->
+    <nav>
+        <ul>
+            <li><a href="#">首页</a></li>
+            <li><a href="#project">项目经验</a></li>
+            <li><a href="#skills">技能清单</a></li>
+            <li><a href="#about">自我评价</a></li>
+        </ul>
+    </nav>
+
+    <!-- 轮播图区域，简单示意 -->
+    <section class="slider">
+        <img src="image1.jpg" alt="网页开发相关图片1">
+        <img src="image2.jpg" alt="网页开发相关图片2">
+    </section>
+
+    <!-- 主体内容区 -->
+    <!-- 个人信息 -->
+    <section class="info">
+        <h1>[你的名字]</h1>
+        <p>联系方式：[手机号码]</p>
+        <p>电子邮箱：[邮箱地址]</p>
+    </section>
+
+    <!-- 求职意向 -->
+    <section class="job-intent">
+        <h2>求职意向</h2>
+        <p>目标岗位：网页开发相关岗位</p>
+        <p>求职类型：全职</p>
+        <p>期望薪资：[X]元</p>
+    </section>
+
+    <!-- 教育背景 -->
+    <section class="education">
+        <h2>教育背景</h2>
+        <div class="edu-item">
+            <p>[大学名称] - 计算机相关专业（[入学时间]-[毕业时间]）</p>
+            <p>相关课程：数据结构、算法分析、编程语言（Python、Java等）、数据库原理、Web开发基础</p>
+        </div>
+    </section>
+
+    <!-- 项目经验 -->
+    <section class="project" id="project">
+        <h2>个人作品集展示网页</h2>
+        <p class="project-desc">这是一个展示我过往网页开发作品的平台。网页整体设计简洁大方，以灰白色调为主，搭配淡蓝色作为强调色，营造出专业、整洁的视觉感受。布局上，采用导航栏引导用户快速访问不同板块，包括项目展示区、个人介绍区以及联系方式区。项目展示区以卡片形式呈现各个作品，点击卡片可展开详细介绍，包括作品功能、技术实现要点、设计思路等。个人介绍区简要阐述了我的编程经历、对网页开发的热情来源以及个人优势。联系方式区提供了多种与我沟通的方式。</p>
+        <p class="project-tech">技术实现：前端运用HTML5构建页面结构，CSS3实现样式美化，借助JavaScript实现交互效果，如卡片展开收缩动画、导航栏切换效果等。后端选用Node.js搭建服务器，使用Express
