@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感恩爸妈，养我长大</title>
+    <style>
+        /* 整体页面样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8eccf;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            color: #d96459;
+            padding: 20px;
+            font-size: 3em;
+        }
+
+        /* 幻灯片区域样式 */
+      .slideshow-container {
+            position: relative;
+            margin: auto;
+            max-width: 800px;
+        }
+
+        /* 幻灯片图片样式 */
+      .mySlides {
+            display: none;
+            width: 100%;
+        }
+
+        /* 幻灯片下方的描述文字样式 */
+      .text {
+            color: #f2f2f2;
+            font-size: 15px;
+            padding: 8px 12px;
+            position: absolute;
+            bottom: 8px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 左右箭头按钮样式 */
+      .prev,
+      .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            margin-top: -22px;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+        }
+
+        /* 下一个箭头在右侧 */
+      .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+
+        /* 鼠标悬停在箭头按钮上的样式 */
+      .prev:hover,
+      .next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* 情感倾诉文本区域样式 */
+      .story {
+            padding: 20px;
+            text-align: justify;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 视频区域样式 */
+      .video-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* 留言区样式 */
+      .comment-section {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+      .comment-section h2 {
+            text-align: center;
+        }
+
+      .comment-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+      .comment-submit {
+            background-color: #d96459;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+      .comment-submit:hover {
+            background-color: #c24d42;
+        }
+
+      .comments {
+            list-style-type: none;
+            padding: 0;
+        }
+
+      .comments li {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>感恩爸妈，养我长大</h1>
+    <!-- 幻灯片区域 -->
+    <div class="slideshow-container">
+        <div class="mySlides fade">
+            <img src="photo1.jpg" style="width:100%">
+            <div class="text">这是小时候第一次去公园的照片</div>
+        </div
