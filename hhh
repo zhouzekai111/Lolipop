@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明代婉约风五言绝句生成</title>
+    <style>
+        body {
+            font-family: 'SimSun', serif;
+            background-image: url('xuanzhi.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #551a8b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        input {
+            width: 200px;
+            height: 35px;
+            margin: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            padding: 0 10px;
+            font-size: 1em;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        button {
+            width: 100px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background-color: #800080;
+            color: white;
+            font-size: 1.2em;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #9932CC;
+        }
+
+        p.poem {
+            font-family: 'KaiTi', serif;
+            font-size: 1.5em;
+            margin: 20px 0;
+            text-align: center;
+            color: #551a8b;
+        }
+
+        footer {
+            margin-top: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>古韵诗风——明代婉约风五言绝句生成</h1>
+    <input type="text" placeholder="关键词1">
+    <input type="text" placeholder="关键词2">
+    <input type="text" placeholder="关键词3">
+    <button id="generateButton">生成</button>
+    <p class
