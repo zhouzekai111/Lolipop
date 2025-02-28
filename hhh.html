@@ -1,57 +1,159 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人简历</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>明代婉约风诗笺</title>
+    <style>
+        body {
+            font-family: '楷体', 'SimKai', serif;
+            background: #2d1a0f url('old-paper-texture.jpg');
+            color: #5c3b2f;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 248, 220, 0.9);
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .bamboo-border {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: url('bamboo-pattern.png') repeat;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        input {
+            padding: 12px;
+            width: 150px;
+            border: 1px solid #8b7355;
+            border-radius: 4px;
+            font-size: 16px;
+            background: #fffaf0;
+            font-family: inherit;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: #8b7355;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: #6b5843;
+        }
+
+        #poem-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5e6d3;
+            border: 2px dashed #8b7355;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.8em;
+            line-height: 2.5;
+            min-height: 200px;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .seal {
+            position: absolute;
+            width: 80px;
+            bottom: -20px;
+            right: -20px;
+            opacity: 0.8;
+        }
+    </style>
 </head>
-
 <body>
-    <!-- 顶部导航栏 -->
-    <nav>
-        <ul>
-            <li><a href="#">首页</a></li>
-            <li><a href="#project">项目经验</a></li>
-            <li><a href="#skills">技能清单</a></li>
-            <li><a href="#about">自我评价</a></li>
-        </ul>
-    </nav>
-
-    <!-- 轮播图区域，简单示意 -->
-    <section class="slider">
-        <img src="image1.jpg" alt="网页开发相关图片1">
-        <img src="image2.jpg" alt="网页开发相关图片2">
-    </section>
-
-    <!-- 主体内容区 -->
-    <!-- 个人信息 -->
-    <section class="info">
-        <h1>[你的名字]</h1>
-        <p>联系方式：[手机号码]</p>
-        <p>电子邮箱：[邮箱地址]</p>
-    </section>
-
-    <!-- 求职意向 -->
-    <section class="job-intent">
-        <h2>求职意向</h2>
-        <p>目标岗位：网页开发相关岗位</p>
-        <p>求职类型：全职</p>
-        <p>期望薪资：[X]元</p>
-    </section>
-
-    <!-- 教育背景 -->
-    <section class="education">
-        <h2>教育背景</h2>
-        <div class="edu-item">
-            <p>[大学名称] - 计算机相关专业（[入学时间]-[毕业时间]）</p>
-            <p>相关课程：数据结构、算法分析、编程语言（Python、Java等）、数据库原理、Web开发基础</p>
+    <div class="container">
+        <div class="bamboo-border"></div>
+        <h1>婉约诗笺·明风雅韵</h1>
+        
+        <div class="input-group">
+            <input type="text" id="keyword1" placeholder="入墨词">
+            <input type="text" id="keyword2" placeholder="点韵词">
+            <input type="text" id="keyword3" placeholder="落笔词">
         </div>
-    </section>
+        
+        <div style="text-align: center;">
+            <button onclick="generatePoem()">点墨成诗</button>
+        </div>
 
-    <!-- 项目经验 -->
-    <section class="project" id="project">
-        <h2>个人作品集展示网页</h2>
-        <p class="project-desc">这是一个展示我过往网页开发作品的平台。网页整体设计简洁大方，以灰白色调为主，搭配淡蓝色作为强调色，营造出专业、整洁的视觉感受。布局上，采用导航栏引导用户快速访问不同板块，包括项目展示区、个人介绍区以及联系方式区。项目展示区以卡片形式呈现各个作品，点击卡片可展开详细介绍，包括作品功能、技术实现要点、设计思路等。个人介绍区简要阐述了我的编程经历、对网页开发的热情来源以及个人优势。联系方式区提供了多种与我沟通的方式。</p>
-        <p class="project-tech">技术实现：前端运用HTML5构建页面结构，CSS3实现样式美化，借助JavaScript实现交互效果，如卡片展开收缩动画、导航栏切换效果等。后端选用Node.js搭建服务器，使用Express
+        <div id="poem-container">
+            <img src="red-seal.png" class="seal" alt="印章">
+        </div>
+    </div>
+
+    <script>
+        // 明代婉约风格词汇库
+        const dictionary = {
+            nouns: ["朱阁", "翠袖", "瑶琴", "残烛", "孤鸿", "玉簪", "锦书", "罗幕"],
+            verbs: ["独倚", "暗抛", "轻叹", "空忆", "倦理", "忍看", "闲敲", "愁对"],
+            adjectives: ["离离", "戚戚", "泠泠", "萧萧", "幽幽", "斑斑", "盈盈", "恹恹"]
+        };
+
+        function generateLine(keywords) {
+            // 生成符合五言格律的诗句
+            const patterns = [
+                () => `${keywords[0]}${dictionary.verbs[Math.floor(Math.random()*8)]}${dictionary.nouns[Math.floor(Math.random()*8)]}`,
+                () => `${dictionary.adjectives[Math.floor(Math.random()*8)]}${keywords[1]}${dictionary.verbs[Math.floor(Math.random()*8)].slice(1)}`,
+                () => `${dictionary.nouns[Math.floor(Math.random()*8)]}${keywords[2]}${dictionary.adjectives[Math.floor(Math.random()*8)].slice(1)}`,
+                () => `${dictionary.verbs[Math.floor(Math.random()*8)]}${keywords[0]}${dictionary.nouns[Math.floor(Math.random()*8)].slice(1)}`
+            ];
+            
+            return patterns[Math.floor(Math.random()*patterns.length)]();
+        }
+
+        function generatePoem() {
+            const keywords = [
+                document.getElementById('keyword1').value,
+                document.getElementById('keyword2').value,
+                document.getElementById('keyword3').value
+            ];
+
+            if (keywords.some(k => !k)) {
+                alert("请完整填写三处词笺");
+                return;
+            }
+
+            const poem = Array.from({length: 4}, () => generateLine(keywords));
+            const poemContainer = document.getElementById('poem-container');
+            poemContainer.innerHTML = poem.join('\n') + '<img src="red-seal.png" class="seal" alt="印章">';
+        }
+    </script>
+</body>
+</html>
