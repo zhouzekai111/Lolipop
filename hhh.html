@@ -1,231 +1,109 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微博热搜实时追踪</title>
-    <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            background: #e94b3f;
-            color: white;
-            padding: 20px;
-            border-radius: 10px 10px 0 0;
-        }
-        .rankings {
-            padding: 20px;
-        }
-        .hot-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: all 0.3s;
-        }
-        .hot-item:hover {
-            background: #f9f9f9;
-        }
-        .rank {
-            width: 40px;
-            font-weight: bold;
-            color: #666;
-        }
-        .keyword {
-            flex: 1;
-            font-size: 16px;
-        }
-        .heat {
-            width: 100px;
-            text-align: right;
-            color: #e94b3f;
-        }
-        .tag {
-            margin-left: 10px;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-        .new { background: #ffdce0; color: #cf1322; }
-        .hot { background: #fff1f0; color: #f5222d; }
-        .boom { background: #fadb14; color: #000; }
-        @keyframes highlight {
-            from { background: #fffbe6; }
-            to { background: transparent; }
-        }
-        .updated {
-            animation: highlight 1.5s;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>微博实时热搜榜</h1>
-            <div>更新时间：<span id="updateTime">正在获取...</span></div>
-        </div>
-        <div class="rankings" id="rankings"></div>
-    </div>
+# 安装依赖
+# pip install flask transformers torch jieba
 
-    <script>
-        // 动态创建热搜条目
-        function createHotItem(item) {
-            const div = document.createElement('div');
-            div.className = 'hot-item';
-            
-            div.innerHTML = `
-                <div class="rank">${item.rank}</div>
-                <div class="keyword">
-                    ${item.keyword}
-                    ${item.tag ? `<span class="tag ${item.tag}">${item.tag.toUpperCase()}</span>` : ''}
-                </div>
-                <div class="heat">${item.heat}℃</div>
-            `;
-            
-            return div;
-        }
-
-        // 更新整个榜单
-        function updateRankings(data) {
-            const container = document.getElementById('rankings');
-            const fragment = document.createDocumentFragment();
-            
-            data.forEach(item => {
-                const existingItem = container.querySelector(`[data-rank="${item.rank}"]`);
-                if (existingItem) {
-                    // 触发更新动画
-                    if (existingItem.dataset.keyword !== item.keyword) {
-                        existingItem.classList.add('updated');
-                        setTimeout(() => {
-                            existingItem.classList.remove('updated');
-                        }, 1500);
-                    }
-                    existingItem.innerHTML = createHotItem(item).innerHTML;
-                    existingItem.dataset = item;
-                } else {
-                    const newItem = createHotItem(item);
-                    newItem.dataset.rank = item.rank;
-                    fragment.appendChild(newItem);
-                }
-            });
-            
-            document.getElementById('updateTime').textContent = 
-                new Date().toLocaleTimeString();
-            container.prepend(fragment);
-        }
-
-        // WebSocket连接
-        const socket = new WebSocket('wss://your-backend.com/weibo-hot');
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            updateRankings(data);
-        };
-
-        socket.onerror = (error) => {
-            console.error('WebSocket Error:', error);
-        };
-
-        // 每60秒主动请求更新（备用）
-        setInterval(async () => {
-            try {
-                const response = await fetch('/api/weibo-hot');
-                const data = await response.json();
-                updateRankings(data);
-            } catch (error) {
-                console.error('Fetch Error:', error);
-            }
-        }, 60000);
-    </script>
-</body>
-</html>
-
-from flask import Flask, jsonify
-from flask_cors import CORS
-import requests
-from bs4 import BeautifulSoup
-from threading import Thread
-import time
+# app.py
+from flask import Flask, render_template, request
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import jieba
+import re
 
 app = Flask(__name__)
-CORS(app)
 
-latest_data = []
-update_lock = False
+# 加载专业古诗模型
+tokenizer = AutoTokenizer.from_pretrained("gpt2-chinese-poem")
+model = AutoModelForSeq2SeqLM.from_pretrained("gpt2-chinese-poem")
 
-def fetch_weibo_hot():
-    global latest_data, update_lock
-    while True:
+# 风格映射字典
+STYLE_PROMPTS = {
+    "平实质朴": "[朴实]",
+    "含蓄隽永": "[含蓄]",
+    "绚丽飘逸": "[绚丽]",
+    "简洁明快": "[明快]",
+    "雄浑壮丽": "[雄浑]",
+    "粗犷豪放": "[豪放]",
+    "沉郁顿挫": "[沉郁]",
+    "缠绵哀怨": "[哀怨]"
+}
+
+def generate_jueju(keywords, style):
+    # 构建符合古诗格式的prompt
+    style_tag = STYLE_PROMPTS.get(style, "")
+    prompt = f"{style_tag}{'，'.join(keywords)}"
+    
+    # 生成参数设置
+    inputs = tokenizer(prompt, return_tensors="pt", max_length=32, truncation=True)
+    outputs = model.generate(
+        inputs.input_ids,
+        max_length=64,
+        num_beams=5,
+        early_stopping=True,
+        no_repeat_ngram_size=2
+    )
+    
+    # 解码和后处理
+    generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return format_poem(generated)
+
+def format_poem(text):
+    # 使用正则表达式提取符合五言绝句格式的内容
+    sentences = re.findall(r'[\u4e00-\u9fa5]{5}[，。]', text)
+    valid = []
+    for s in sentences[:4]:
+        if len(s) == 6 and s[-1] in ["，", "。"]:
+            valid.append(s[:5] + s[-1])
+    # 确保押韵
+    if len(valid) >=4:
+        last_char = valid[3][4]
+        valid[1] = valid[1][:4] + "，"
+        valid[3] = valid[3][:4] + "。"
+        if valid[0][4] != "，" or valid[2][4] != "，":
+            valid = [s[:4]+"，" if i%2==0 else s[:4]+"。" for i,s in enumerate(valid[:4])]
+    return "\n".join(valid[:4])
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        keywords = request.form.get('keywords', '').split()
+        style = request.form.get('style', '平实质朴')
+        
+        if not 2 <= len(keywords) <=5:
+            return render_template('index.html', 
+                error="请输入2-5个关键词，用空格分隔哦~")
+            
         try:
-            if update_lock:
-                continue
-                
-            update_lock = True
-            url = 'https://s.weibo.com/top/summary'
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...'
-            }
-            
-            response = requests.get(url, headers=headers)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            hot_list = []
-            for item in soup.select('.data tbody tr'):
-                rank = item.select_one('td.ranktop').get('value')
-                keyword = item.select_one('td a').text
-                tag = item.select_one('td span')['class'][0] if item.select_one('td span') else ''
-                heat = item.select_one('td span').text if item.select_one('td span') else ''
-                
-                hot_list.append({
-                    'rank': int(rank),
-                    'keyword': keyword,
-                    'tag': tag,
-                    'heat': heat
-                })
-            
-            latest_data = hot_list[:50]
-            update_lock = False
-            time.sleep(60)  # 每分钟更新
-            
+            poem = generate_jueju(keywords, style)
+            return render_template('result.html', 
+                poem=poem,
+                keywords=keywords,
+                style=style)
         except Exception as e:
-            print(f"Error fetching data: {str(e)}")
-            time.sleep(30)
-
-@app.route('/api/weibo-hot')
-def get_hot():
-    return jsonify({'data': latest_data})
+            return render_template('index.html', 
+                error="诗歌生成失败，请稍后再试...")
+    
+    return render_template('index.html')
 
 if __name__ == '__main__':
-    Thread(target=fetch_weibo_hot).start()
-    app.run(port=5000, debug=False)
-
-    pip install flask beautifulsoup4 requests flask-cors
-    python app.py
-    server {
-    listen 80;
-    server_name your-domain.com;
-    
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-
-    location /socket.io {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
+    app.run(port=5000, debug=True)
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>五言绝句生成器</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .poem-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .chinese-font {
+            font-family: 'STKaiti', '华文楷体', serif;
+        }
+        .input-style {
+            border-radius: 25px;
+            padding: 15px 25px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        .input-style:focus {
+            border
