@@ -1,109 +1,108 @@
-# 安装依赖
-# pip install flask transformers torch jieba
-
-# app.py
-from flask import Flask, render_template, request
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-import jieba
-import re
-
-app = Flask(__name__)
-
-# 加载专业古诗模型
-tokenizer = AutoTokenizer.from_pretrained("gpt2-chinese-poem")
-model = AutoModelForSeq2SeqLM.from_pretrained("gpt2-chinese-poem")
-
-# 风格映射字典
-STYLE_PROMPTS = {
-    "平实质朴": "[朴实]",
-    "含蓄隽永": "[含蓄]",
-    "绚丽飘逸": "[绚丽]",
-    "简洁明快": "[明快]",
-    "雄浑壮丽": "[雄浑]",
-    "粗犷豪放": "[豪放]",
-    "沉郁顿挫": "[沉郁]",
-    "缠绵哀怨": "[哀怨]"
-}
-
-def generate_jueju(keywords, style):
-    # 构建符合古诗格式的prompt
-    style_tag = STYLE_PROMPTS.get(style, "")
-    prompt = f"{style_tag}{'，'.join(keywords)}"
-    
-    # 生成参数设置
-    inputs = tokenizer(prompt, return_tensors="pt", max_length=32, truncation=True)
-    outputs = model.generate(
-        inputs.input_ids,
-        max_length=64,
-        num_beams=5,
-        early_stopping=True,
-        no_repeat_ngram_size=2
-    )
-    
-    # 解码和后处理
-    generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return format_poem(generated)
-
-def format_poem(text):
-    # 使用正则表达式提取符合五言绝句格式的内容
-    sentences = re.findall(r'[\u4e00-\u9fa5]{5}[，。]', text)
-    valid = []
-    for s in sentences[:4]:
-        if len(s) == 6 and s[-1] in ["，", "。"]:
-            valid.append(s[:5] + s[-1])
-    # 确保押韵
-    if len(valid) >=4:
-        last_char = valid[3][4]
-        valid[1] = valid[1][:4] + "，"
-        valid[3] = valid[3][:4] + "。"
-        if valid[0][4] != "，" or valid[2][4] != "，":
-            valid = [s[:4]+"，" if i%2==0 else s[:4]+"。" for i,s in enumerate(valid[:4])]
-    return "\n".join(valid[:4])
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        keywords = request.form.get('keywords', '').split()
-        style = request.form.get('style', '平实质朴')
-        
-        if not 2 <= len(keywords) <=5:
-            return render_template('index.html', 
-                error="请输入2-5个关键词，用空格分隔哦~")
-            
-        try:
-            poem = generate_jueju(keywords, style)
-            return render_template('result.html', 
-                poem=poem,
-                keywords=keywords,
-                style=style)
-        except Exception as e:
-            return render_template('index.html', 
-                error="诗歌生成失败，请稍后再试...")
-    
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(port=5000, debug=True)
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>五言绝句生成器</title>
+    <title>纯前端古诗生成器</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
     <style>
-        .poem-container {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        /* 新增水墨动画背景 */
+        .ink-bg {
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.05) 20%, transparent 80%),
+                linear-gradient(45deg, #f3e7e9 0%, #e3eeff 99%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .poem-card {
+            background: rgba(255,255,255,0.95);
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            backdrop-filter: blur(10px);
         }
-        .chinese-font {
-            font-family: 'STKaiti', '华文楷体', serif;
+
+        /* 毛笔字体 */
+        .brush-font {
+            font-family: 'Ma Shan Zheng', cursive;
         }
-        .input-style {
-            border-radius: 25px;
-            padding: 15px 25px;
-            border: 2px solid #dee2e6;
-            transition: all 0.3s;
+
+        /* 动态加载效果 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6c5ce7;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
         }
-        .input-style:focus {
-            border
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="ink-bg">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="poem-card p-4">
+                    <h1 class="text-center brush-font mb-4">水墨诗韵</h1>
+                    
+                    <div class="input-group mb-3">
+                        <input type="text" id="keywords" 
+                               class="form-control" 
+                               placeholder="输入2-5个关键词（空格分隔）">
+                        <select id="style" class="form-select">
+                            <option value="平实质朴">平实质朴</option>
+                            <option value="含蓄隽永">含蓄隽永</option>
+                            <option value="绚丽飘逸">绚丽飘逸</option>
+                            <option value="简洁明快">简洁明快</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="generatePoem()">生成</button>
+                    </div>
+                    
+                    <div id="output" class="text-center fs-5 brush-font" style="min-height: 120px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// 加载预训练的诗歌生成模型（需要提前转换好的模型）
+let model;
+async function loadModel() {
+    model = await tf.loadGraphModel('path/to/converted/model.json');
+}
+loadModel();
+
+// 风格映射
+const styleVectors = {
+    '平实质朴': [0.8, 0.2, 0.3],
+    '含蓄隽永': [0.4, 0.9, 0.5],
+    '绚丽飘逸': [0.7, 0.6, 0.8],
+    '简洁明快': [0.3, 0.7, 0.4]
+};
+
+// 生成五言绝句
+async function generatePoem() {
+    const keywords = document.getElementById('keywords').value.split(' ');
+    const style = document.getElementById('style').value;
+    
+    if(keywords.length <2 || keywords.length>5) {
+        alert('请输入2-5个关键词');
+        return;
+    }
+
+    const output = document.getElementById('output');
+    output.innerHTML = '<div class="loader mx-auto"></div>';
+    
+    try {
+        // 使用Universal Sentence Encoder转换语义
+        const use = await use.load();
+        const keywordEmbedding = await use.embed(keywords.join(' '));
+        
+        // 生成古诗
+        const poem = await generateWithModel(keywordEmbedding, styleVectors[style]);
