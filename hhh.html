@@ -3,157 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>明代婉约风诗笺</title>
+    <title>微博热搜实时追踪</title>
     <style>
         body {
-            font-family: '楷体', 'SimKai', serif;
-            background: #2d1a0f url('old-paper-texture.jpg');
-            color: #5c3b2f;
-            min-height: 100vh;
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
             padding: 20px;
-            box-sizing: border-box;
         }
-
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(255, 248, 220, 0.9);
-            padding: 30px;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            position: relative;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .bamboo-border {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: url('bamboo-pattern.png') repeat;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-
-        input {
-            padding: 12px;
-            width: 150px;
-            border: 1px solid #8b7355;
-            border-radius: 4px;
-            font-size: 16px;
-            background: #fffaf0;
-            font-family: inherit;
-        }
-
-        button {
-            padding: 12px 30px;
-            background: #8b7355;
+        .header {
+            background: #e94b3f;
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-            font-family: inherit;
-        }
-
-        button:hover {
-            background: #6b5843;
-        }
-
-        #poem-container {
-            margin-top: 30px;
             padding: 20px;
-            background: #f5e6d3;
-            border: 2px dashed #8b7355;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 1.8em;
-            line-height: 2.5;
-            min-height: 200px;
-            white-space: pre-wrap;
-            position: relative;
+            border-radius: 10px 10px 0 0;
         }
-
-        .seal {
-            position: absolute;
-            width: 80px;
-            bottom: -20px;
-            right: -20px;
-            opacity: 0.8;
+        .rankings {
+            padding: 20px;
+        }
+        .hot-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        .hot-item:hover {
+            background: #f9f9f9;
+        }
+        .rank {
+            width: 40px;
+            font-weight: bold;
+            color: #666;
+        }
+        .keyword {
+            flex: 1;
+            font-size: 16px;
+        }
+        .heat {
+            width: 100px;
+            text-align: right;
+            color: #e94b3f;
+        }
+        .tag {
+            margin-left: 10px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .new { background: #ffdce0; color: #cf1322; }
+        .hot { background: #fff1f0; color: #f5222d; }
+        .boom { background: #fadb14; color: #000; }
+        @keyframes highlight {
+            from { background: #fffbe6; }
+            to { background: transparent; }
+        }
+        .updated {
+            animation: highlight 1.5s;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="bamboo-border"></div>
-        <h1>婉约诗笺·明风雅韵</h1>
-        
-        <div class="input-group">
-            <input type="text" id="keyword1" placeholder="入墨词">
-            <input type="text" id="keyword2" placeholder="点韵词">
-            <input type="text" id="keyword3" placeholder="落笔词">
+        <div class="header">
+            <h1>微博实时热搜榜</h1>
+            <div>更新时间：<span id="updateTime">正在获取...</span></div>
         </div>
-        
-        <div style="text-align: center;">
-            <button onclick="generatePoem()">点墨成诗</button>
-        </div>
-
-        <div id="poem-container">
-            <img src="red-seal.png" class="seal" alt="印章">
-        </div>
+        <div class="rankings" id="rankings"></div>
     </div>
 
     <script>
-        // 明代婉约风格词汇库
-        const dictionary = {
-            nouns: ["朱阁", "翠袖", "瑶琴", "残烛", "孤鸿", "玉簪", "锦书", "罗幕"],
-            verbs: ["独倚", "暗抛", "轻叹", "空忆", "倦理", "忍看", "闲敲", "愁对"],
-            adjectives: ["离离", "戚戚", "泠泠", "萧萧", "幽幽", "斑斑", "盈盈", "恹恹"]
+        // 动态创建热搜条目
+        function createHotItem(item) {
+            const div = document.createElement('div');
+            div.className = 'hot-item';
+            
+            div.innerHTML = `
+                <div class="rank">${item.rank}</div>
+                <div class="keyword">
+                    ${item.keyword}
+                    ${item.tag ? `<span class="tag ${item.tag}">${item.tag.toUpperCase()}</span>` : ''}
+                </div>
+                <div class="heat">${item.heat}℃</div>
+            `;
+            
+            return div;
+        }
+
+        // 更新整个榜单
+        function updateRankings(data) {
+            const container = document.getElementById('rankings');
+            const fragment = document.createDocumentFragment();
+            
+            data.forEach(item => {
+                const existingItem = container.querySelector(`[data-rank="${item.rank}"]`);
+                if (existingItem) {
+                    // 触发更新动画
+                    if (existingItem.dataset.keyword !== item.keyword) {
+                        existingItem.classList.add('updated');
+                        setTimeout(() => {
+                            existingItem.classList.remove('updated');
+                        }, 1500);
+                    }
+                    existingItem.innerHTML = createHotItem(item).innerHTML;
+                    existingItem.dataset = item;
+                } else {
+                    const newItem = createHotItem(item);
+                    newItem.dataset.rank = item.rank;
+                    fragment.appendChild(newItem);
+                }
+            });
+            
+            document.getElementById('updateTime').textContent = 
+                new Date().toLocaleTimeString();
+            container.prepend(fragment);
+        }
+
+        // WebSocket连接
+        const socket = new WebSocket('wss://your-backend.com/weibo-hot');
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateRankings(data);
         };
 
-        function generateLine(keywords) {
-            // 生成符合五言格律的诗句
-            const patterns = [
-                () => `${keywords[0]}${dictionary.verbs[Math.floor(Math.random()*8)]}${dictionary.nouns[Math.floor(Math.random()*8)]}`,
-                () => `${dictionary.adjectives[Math.floor(Math.random()*8)]}${keywords[1]}${dictionary.verbs[Math.floor(Math.random()*8)].slice(1)}`,
-                () => `${dictionary.nouns[Math.floor(Math.random()*8)]}${keywords[2]}${dictionary.adjectives[Math.floor(Math.random()*8)].slice(1)}`,
-                () => `${dictionary.verbs[Math.floor(Math.random()*8)]}${keywords[0]}${dictionary.nouns[Math.floor(Math.random()*8)].slice(1)}`
-            ];
-            
-            return patterns[Math.floor(Math.random()*patterns.length)]();
-        }
+        socket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+        };
 
-        function generatePoem() {
-            const keywords = [
-                document.getElementById('keyword1').value,
-                document.getElementById('keyword2').value,
-                document.getElementById('keyword3').value
-            ];
-
-            if (keywords.some(k => !k)) {
-                alert("请完整填写三处词笺");
-                return;
+        // 每60秒主动请求更新（备用）
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/weibo-hot');
+                const data = await response.json();
+                updateRankings(data);
+            } catch (error) {
+                console.error('Fetch Error:', error);
             }
-
-            const poem = Array.from({length: 4}, () => generateLine(keywords));
-            const poemContainer = document.getElementById('poem-container');
-            poemContainer.innerHTML = poem.join('\n') + '<img src="red-seal.png" class="seal" alt="印章">';
-        }
+        }, 60000);
     </script>
 </body>
 </html>
+
+from flask import Flask, jsonify
+from flask_cors import CORS
+import requests
+from bs4 import BeautifulSoup
+from threading import Thread
+import time
+
+app = Flask(__name__)
+CORS(app)
+
+latest_data = []
+update_lock = False
+
+def fetch_weibo_hot():
+    global latest_data, update_lock
+    while True:
+        try:
+            if update_lock:
+                continue
+                
+            update_lock = True
+            url = 'https://s.weibo.com/top/summary'
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...'
+            }
+            
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            hot_list = []
+            for item in soup.select('.data tbody tr'):
+                rank = item.select_one('td.ranktop').get('value')
+                keyword = item.select_one('td a').text
+                tag = item.select_one('td span')['class'][0] if item.select_one('td span') else ''
+                heat = item.select_one('td span').text if item.select_one('td span') else ''
+                
+                hot_list.append({
+                    'rank': int(rank),
+                    'keyword': keyword,
+                    'tag': tag,
+                    'heat': heat
+                })
+            
+            latest_data = hot_list[:50]
+            update_lock = False
+            time.sleep(60)  # 每分钟更新
+            
+        except Exception as e:
+            print(f"Error fetching data: {str(e)}")
+            time.sleep(30)
+
+@app.route('/api/weibo-hot')
+def get_hot():
+    return jsonify({'data': latest_data})
+
+if __name__ == '__main__':
+    Thread(target=fetch_weibo_hot).start()
+    app.run(port=5000, debug=False)
+
+    pip install flask beautifulsoup4 requests flask-cors
+    python app.py
+    server {
+    listen 80;
+    server_name your-domain.com;
+    
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /socket.io {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
