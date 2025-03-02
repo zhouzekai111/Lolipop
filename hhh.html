@@ -1,108 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>纯前端古诗生成器</title>
+    <title>五言绝句生成器</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
     <style>
-        /* 新增水墨动画背景 */
-        .ink-bg {
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.05) 20%, transparent 80%),
-                linear-gradient(45deg, #f3e7e9 0%, #e3eeff 99%);
-            min-height: 100vh;
-            position: relative;
-            overflow: hidden;
-        }
-
         .poem-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-            backdrop-filter: blur(10px);
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-
-        /* 毛笔字体 */
-        .brush-font {
-            font-family: 'Ma Shan Zheng', cursive;
+        .chinese-font {
+            font-family: 'SimSun', serif;
         }
-
-        /* 动态加载效果 */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #6c5ce7;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+        .loading-dots:after {
+            content: '...';
+            animation: dots 1s steps(5, end) infinite;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
         }
     </style>
 </head>
-<body class="ink-bg">
+<body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="poem-card p-4">
-                    <h1 class="text-center brush-font mb-4">水墨诗韵</h1>
-                    
+            <div class="col-md-6">
+                <div class="poem-card p-4 mb-4">
+                    <h3 class="text-center mb-4">五言绝句生成器</h3>
                     <div class="input-group mb-3">
                         <input type="text" id="keywords" 
                                class="form-control" 
-                               placeholder="输入2-5个关键词（空格分隔）">
-                        <select id="style" class="form-select">
-                            <option value="平实质朴">平实质朴</option>
-                            <option value="含蓄隽永">含蓄隽永</option>
-                            <option value="绚丽飘逸">绚丽飘逸</option>
-                            <option value="简洁明快">简洁明快</option>
-                        </select>
+                               placeholder="输入2-5个关键词（例如：明月 清风）">
                         <button class="btn btn-primary" onclick="generatePoem()">生成</button>
                     </div>
-                    
-                    <div id="output" class="text-center fs-5 brush-font" style="min-height: 120px;"></div>
+                    <div id="poem-output" class="text-center chinese-font fs-5"></div>
                 </div>
             </div>
         </div>
     </div>
 
 <script>
-// 加载预训练的诗歌生成模型（需要提前转换好的模型）
-let model;
-async function loadModel() {
-    model = await tf.loadGraphModel('path/to/converted/model.json');
-}
-loadModel();
-
-// 风格映射
-const styleVectors = {
-    '平实质朴': [0.8, 0.2, 0.3],
-    '含蓄隽永': [0.4, 0.9, 0.5],
-    '绚丽飘逸': [0.7, 0.6, 0.8],
-    '简洁明快': [0.3, 0.7, 0.4]
+// 基础词库与模板
+const DICT = {
+    明月: ['皎皎空中月', '明月照高楼', '清辉万里同', '玉轮悬夜空'],
+    清风: ['清风拂面来', '微风吹罗幕', '轻风入怀抱', '和风送春归'],
+    山河: ['山河表里潼', '千山鸟飞绝', '国破山河在', '山河万里情']
 };
 
-// 生成五言绝句
-async function generatePoem() {
-    const keywords = document.getElementById('keywords').value.split(' ');
-    const style = document.getElementById('style').value;
+const TEMPLATES = [
+    { pattern: 'A，B。C，D。' },
+    { pattern: 'A，B。C，D。' },
+    { pattern: 'A，B。C，D。' }
+];
+
+function generatePoem() {
+    const keywords = document.getElementById('keywords').value.trim().split(' ');
+    const output = document.getElementById('poem-output');
     
-    if(keywords.length <2 || keywords.length>5) {
-        alert('请输入2-5个关键词');
+    if (keywords.length < 2 || keywords.length > 5) {
+        output.innerHTML = '<div class="text-danger">请输入2-5个关键词</div>';
         return;
     }
 
-    const output = document.getElementById('output');
-    output.innerHTML = '<div class="loader mx-auto"></div>';
+    output.innerHTML = '<div class="text-muted">创作中<span class="loading-dots"></span></div>';
     
-    try {
-        // 使用Universal Sentence Encoder转换语义
-        const use = await use.load();
-        const keywordEmbedding = await use.embed(keywords.join(' '));
-        
-        // 生成古诗
-        const poem = await generateWithModel(keywordEmbedding, styleVectors[style]);
+    // 生成延迟效果
+    setTimeout(() => {
+        try {
+            const poemLines = [];
+            const selectedWords = [];
+            
+            // 为每个关键词选择诗句
+            keywords.forEach(word => {
+                if (DICT[word]) {
+                    selectedWords.push(...DICT[word]);
+                }
+            });
+
+            // 补足四句
+            while(selectedWords.length <4){
+                selectedWords.push('天意从来高难问');
+            }
+
+            // 组合诗句
+            const template = TEMPLATES[Math.floor(Math.random()*TEMPLATES.length)];
+            const poem = template.pattern
+                .replace('A', selectedWords[0])
+                .replace('B', selectedWords[1])
+                .replace('C', selectedWords[2])
+                .replace('D', selectedWords[3]);
+
+            output.innerHTML = poem.split('。').join('<br>');
+        } catch (error) {
+            output.innerHTML = '<div class="text-danger">生成失败，请重试</div>';
+        }
+    }, 800);
+}
+</script>
+</body>
+</html>
