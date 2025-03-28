@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算器</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+       .calculator {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 320px; /* 固定计算器宽度 */
+            height: 480px; /* 固定计算器高度 */
+        }
+
+       .display {
+            width: calc(100% - 40px);
+            height: 80px;
+            font-size: 36px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: right;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin: 0 auto 20px;
+            padding: 0 15px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease;
+            overflow-x: auto;
+        }
+
+       .display:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+       .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+       .buttons button {
+            width: 100%;
+            height: 60px;
+            font-size: 24px;
+            border: none;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+       .buttons button:hover {
+            background-color: #d0d0d0;
+        }
+
+       .buttons button.operator {
+            background-color: #f39c12;
+            color: white;
+        }
+
+       .buttons button.operator:hover {
+            background-color: #e67e22;
+        }
+
+       .buttons button.clear {
+            background-color: #e74c3c;
+            color: white;
+            grid-column: span 4;
+        }
+
+       .buttons button.clear:hover {
+            background-color: #c0392b;
+        }
+
+       .header-image {
+            width: 320px; /* 图片宽度与计算器宽度一致 */
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="1.png" alt="头图" class="header-image">
+    <div class="calculator">
+        <div id="display" class="display"></div>
+        <div class="buttons">
+            <button onclick="appendToDisplay('7', 'audioNumber')">7</button>
+            <button onclick="appendToDisplay('8', 'audioNumber')">8</button>
+            <button onclick="appendToDisplay('9', 'audioNumber')">9</button>
+            <button onclick="appendToDisplay('/', 'audioOperator')" class="operator">/</button>
+            <button onclick="appendToDisplay('4', 'audioNumber')">4</button>
+            <button onclick="appendToDisplay('5', 'audioNumber')">5</button>
+            <button onclick="appendToDisplay('6', 'audioNumber')">6</button>
+            <button onclick="appendToDisplay('*', 'audioOperator')" class="operator">*</button>
+            <button onclick="appendToDisplay('1', 'audioNumber')">1</button>
+            <button onclick="appendToDisplay('2', 'audioNumber')">2</button>
+            <button onclick="appendToDisplay('3', 'audioNumber')">3</button>
+            <button onclick="appendToDisplay('-', 'audioOperator')" class="operator">-</button>
+            <button onclick="appendToDisplay('0', 'audioNumber')">0</button>
+            <button onclick="appendToDisplay('.', 'audioNumber')">.</button>
+            <button onclick="calculate('audioEqual')">=</button>
+            <button onclick="appendToDisplay('+', 'audioOperator')" class="operator">+</button>
+            <button onclick="clearDisplay('audioClear')" class="clear">清除</button>
+        </div>
+    </div>
+
+    <audio id="audioNumber" src="number.mp3"></audio>
+    <audio id="audioOperator" src="operator.mp3"></audio>
+    <audio id="audioEqual" src="equal.mp3"></audio>
+    <audio id="audioClear" src="clear.mp3"></audio>
+
+    <script>
+        function appendToDisplay(value, audioId) {
+            const display = document.getElementById('display');
+            const audio = document.getElementById(audioId);
+            audio.play();
+
+            const span = document.createElement('span');
+            span.textContent = value;
+            if (/[0-9]/.test(value)) {
+                const colors = ['#FF5733', '#C70039', '#900C3F', '#581845', '#FFC300', '#DAF7A6', '#FF5733', '#C70039', '#900C3F', '#581845'];
+                const index = parseInt(value);
+                span.style.color = colors[index];
+            } else if (/[+\-*/]/.test(value)) {
+                span.style.color = '#007BFF';
+            } else if (value === '.') {
+                span.style.color = '#28A745';
+            }
+            display.appendChild(span);
+        }
+
+        function clearDisplay(audioId) {
+            const display = document.getElementById('display');
+            const audio = document.getElementById(audioId);
+            audio.play();
+            display.innerHTML = '';
+        }
+
+        function calculate(audioId) {
+            const display = document.getElementById('display');
+            const audio = document.getElementById(audioId);
+            audio.play();
+            try {
+                const expression = Array.from(display.children).map(span => span.textContent).join('');
+                const result = eval(expression);
+                display.innerHTML = '';
+                const span = document.createElement('span');
+                span.textContent = result;
+                span.style.color = '#FF00FF';
+                display.appendChild(span);
+            } catch (error) {
+                display.innerHTML = '';
+                const span = document.createElement('span');
+                span.textContent = '错误';
+                span.style.color = '#DC3545';
+                display.appendChild(span);
+            }
+        }
+    </script>
+</body>
+
+</html>    
