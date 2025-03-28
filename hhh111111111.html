@@ -37,6 +37,7 @@
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            animation: rotateCover 5s linear infinite; /* 添加封面旋转动画 */
         }
 
        .cd {
@@ -64,6 +65,15 @@
         }
 
         @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotateCover {
             from {
                 transform: rotate(0deg);
             }
@@ -106,7 +116,7 @@
 <body>
     <div class="music-player">
         <div class="cover-container">
-            <img src="1.jpg" alt="歌曲封面" class="cover">
+            <img src="cover.jpg" alt="歌曲封面" class="cover">
             <div class="cd"></div>
         </div>
         <div class="progress-bar">
@@ -122,16 +132,19 @@
         const audio = document.getElementById('audio');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const progress = document.getElementById('progress');
+        const cover = document.querySelector('.cover');
         const cd = document.querySelector('.cd');
 
         function togglePlayPause() {
             if (audio.paused) {
                 audio.play();
                 playPauseBtn.textContent = '暂停';
+                cover.style.animationPlayState = 'running';
                 cd.style.animationPlayState = 'running';
             } else {
                 audio.pause();
                 playPauseBtn.textContent = '播放';
+                cover.style.animationPlayState = 'paused';
                 cd.style.animationPlayState = 'paused';
             }
         }
@@ -143,10 +156,11 @@
 
         audio.addEventListener('ended', () => {
             playPauseBtn.textContent = '播放';
+            cover.style.animationPlayState = 'paused';
             cd.style.animationPlayState = 'paused';
             progress.style.width = '0%';
         });
     </script>
 </body>
 
-</html>    
+</html>
