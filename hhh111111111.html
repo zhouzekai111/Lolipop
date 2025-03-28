@@ -21,8 +21,8 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            width: 320px; /* 固定计算器宽度 */
-            height: 480px; /* 固定计算器高度 */
+            width: 320px;
+            height: 480px;
         }
 
        .display {
@@ -60,9 +60,11 @@
             background-color: #e0e0e0;
             cursor: pointer;
             border-radius: 5px;
+            transition: transform 0.3s ease; /* 添加过渡效果 */
         }
 
        .buttons button:hover {
+            transform: scale(1.1); /* 鼠标悬停时放大 1.1 倍 */
             background-color: #d0d0d0;
         }
 
@@ -86,7 +88,7 @@
         }
 
        .header-image {
-            width: 320px; /* 图片宽度与计算器宽度一致 */
+            width: 320px;
             height: auto;
             margin-bottom: 20px;
             border-radius: 10px;
