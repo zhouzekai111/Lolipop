@@ -1,0 +1,114 @@
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import re  # 用于处理趋势符号
+
+# ----------------------
+# 1. 数据读取与清洗
+# ----------------------
+def clean_trend_value(value):
+    """清洗趋势值，提取数字并转换为整数"""
+    if pd.isna(value):
+        return None
+    # 匹配数字（支持正负号和箭头符号）
+    num = re.search(r'(\+?\d+|\-\d+)', value).group()
+    return int(num)
+
+# 读取CSV文件（处理特殊分隔符和空行）
+df = pd.read_csv(
+    'hourly_summary.csv',
+    delimiter='|',
+    skiprows=1,  # 跳过首行分隔符行
+    engine='python',
+    na_values=['→', '新上榜']  # 将"→"和"新上榜"视为缺失值
+)
+
+# 过滤无效列（保留关键词和趋势列）
+valid_cols = [col for col in df.columns if '关键词' in col or '趋势' in col]
+df = df[valid_cols].dropna(how='all', axis=1)  # 删除全空列
+
+# 重组数据：将关键词和趋势展开为长格式
+data_long = []
+for idx in df.index:
+    for i in range(1, len(df.columns)//2 + 1):  # 假设关键词和趋势成对出现
+        keyword = df[f'关键词_{i}'].iloc[idx]
+        trend = df[f'趋势_{i}'].iloc[idx]
+        if pd.notna(keyword) and pd.notna(trend):
+            data_long.append({
+                '关键词': keyword,
+                '时间点': f'趋势_{i}',
+                '排名': clean_trend_value(trend)
+            })
+
+# 转换为DataFrame
+clean_df = pd.DataFrame(data_long)
+clean_df['排名'] = clean_df['排名'].astype('Int64')  # 允许缺失值的整数类型
+
+# ----------------------
+# 2. 生成动态折线图
+# ----------------------
+# 创建子图
+fig = make_subplots(
+    rows=1, 
+    cols=1, 
+    title="关键词排名趋势动态图",
+    x_title="时间点",
+    y_title="排名变化（↑/↓数值）"
+)
+
+# 提取所有唯一关键词
+keywords = clean_df['关键词'].unique()
+
+# 为每个关键词添加折线轨迹
+for keyword in keywords:
+    keyword_df = clean_df[clean_df['关键词'] == keyword].sort_values('时间点')
+    
+    # 处理缺失值（用前值填充，或跳过）
+    keyword_df['排名'] = keyword_df['排名'].ffill()  # 向前填充缺失值
+    
+    fig.add_trace(
+        go.Scatter(
+            x=keyword_df['时间点'],
+            y=keyword_df['排名'],
+            mode='lines+markers',
+            name=keyword,
+            hovertemplate=(
+                f'关键词：<b>{keyword}</b><br>' +
+                '时间点：%{x}<br>' +
+                '排名变化：%{y}<br>' +
+                '<extra></extra>'  # 隐藏额外信息
+            ),
+            line=dict(width=2),
+            marker=dict(size=6),
+            opacity=0.8
+        )
+    )
+
+# 配置交互与样式
+fig.update_layout(
+    width=1200,
+    height=700,
+    font=dict(family='微软雅黑', size=12),
+    hovermode='x unified',  # 统一x轴悬停高亮
+    showlegend=True,
+    legend=dict(x=0, y=1, orientation='h'),  # 图例位置
+    xaxis=dict(
+        tickmode='linear',
+        tickangle=45,
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='#e0e0e0'
+    ),
+    yaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='#e0e0e0',
+        zeroline=False
+    )
+)
+
+# ----------------------
+# 3. 生成动态网页
+# ----------------------
+fig.write_html('keyword_trend.html', auto_open=True)
+print("动态网页已生成：keyword_trend.html")
