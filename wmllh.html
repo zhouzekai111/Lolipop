@@ -146,6 +146,8 @@
             margin-bottom: 10px;
             color: #2c3e50;
             font-size: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
         
         .full-trend-item {
@@ -162,6 +164,32 @@
         .full-trend-rank {
             color: #2c3e50;
             font-weight: 500;
+        }
+        
+        .same-time-trends {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .same-time-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .same-time-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .same-time-keyword {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
         }
         
         footer {
@@ -189,6 +217,10 @@
             h1 {
                 font-size: 1.5rem;
             }
+            
+            .full-trend-tooltip {
+                max-width: 250px;
+            }
         }
     </style>
 </head>
@@ -196,7 +228,7 @@
     <div class="container">
         <header>
             <h1>微博热搜趋势动态分析</h1>
-            <p class="subtitle">展示2024年6月5日20:46至21:36期间50个热搜关键词的排名变化趋势。鼠标悬停在节点上可查看完整趋势。</p>
+            <p class="subtitle">展示2024年6月5日20:46至21:36期间50个热搜关键词的排名变化趋势。鼠标悬停在节点上可查看完整趋势及同时间段其他热搜。</p>
         </header>
         
         <div class="dashboard">
@@ -603,6 +635,7 @@
                         // 显示完整趋势工具提示
                         let tooltipContent = `<div class="full-trend-title">${keyword}</div>`;
                         
+                        // 当前关键词的完整趋势
                         dataItem.trends.forEach((rank, i) => {
                             if (rank !== null) {
                                 tooltipContent += `
@@ -613,6 +646,34 @@
                                 `;
                             }
                         });
+                        
+                        // 同时间段其他热搜词条（过滤掉未上榜的，按排名排序）
+                        const sameTimeData = hotSearchData
+                            .filter(item => 
+                                item.keyword !== keyword && 
+                                item.trends[xIndex] !== null &&  // 确保有排名数据
+                                typeof item.trends[xIndex] !== 'undefined' // 确保不是undefined
+                            )
+                            .sort((a, b) => a.trends[xIndex] - b.trends[xIndex])
+                            .slice(0, 5); // 最多显示5条
+                        
+                        if (sameTimeData.length > 0) {
+                            tooltipContent += `
+                                <div class="same-time-trends">
+                                    <div class="same-time-title">同时间段热搜：</div>
+                            `;
+                            
+                            sameTimeData.forEach(item => {
+                                tooltipContent += `
+                                    <div class="same-time-item">
+                                        <span class="same-time-keyword">${item.keyword}</span>
+                                        <span>第${item.trends[xIndex]}名 ${item.trendSymbols[xIndex]}</span>
+                                    </div>
+                                `;
+                            });
+                            
+                            tooltipContent += `</div>`;
+                        }
                         
                         fullTrendTooltip.innerHTML = tooltipContent;
                         fullTrendTooltip.style.left = `${e.clientX + 15}px`;
