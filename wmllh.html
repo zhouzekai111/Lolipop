@@ -134,7 +134,7 @@
             padding: 15px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 100;
-            max-width: 300px;
+            max-width: 350px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
@@ -312,8 +312,8 @@
 5,女子临床死亡后父亲要求继续抢救,→,藏海传豆瓣开分7.1,↑1,孙恩盛回应撞衫贺峻霖,↑5,光与夜之恋偷跑,↓1,光与夜之恋偷跑,→,中美元首6月5日通电话,↑2
 6,藏海传豆瓣开分7.1,↓4,女子临床死亡后父亲要求继续抢救,↓1,女子临床死亡后父亲要求继续抢救,→,女子临床死亡后父亲要求继续抢救,→,女子临床死亡后父亲要求继续抢救,→,光与夜之恋偷跑,↓1
 7,WE淘汰JDG,新上榜,价值13999元labubu盲盒1元起拍,↑1,藏海传豆瓣开分7.1,↓2,藏海传豆瓣开分7.1,→,中美元首6月5日通电话,新上榜,女子临床死亡后父亲要求继续抢救,↓1
-8,价值13999元labubu盲盒1元起拍,↑12,国足首发,↑1,价值13999元labubu盲盒1元起拍,↓1,价值13999元labubu盲盒1元起拍,→,藏海传豆瓣开分7.1,↓1,国足vs印尼,↑40
-9,国足首发,→,WE对战JDG,↑5,印尼考虑购买歼10,↑14,印尼考虑购买歼10,→,印尼考虑购买歼10,→,WE淘汰JDG,↓5
+8,价值13999元labubu盲盒1元起拍,↑12,国足首发,↑1,价值13999元labubu盲盒1元起拍,↓1,价值13999元labubu盲盒1元起拍,→,印尼考虑购买歼10,→,国足vs印尼,↑40
+9,国足首发,→,WE对战JDG,↑5,印尼考虑购买歼10,↑14,印尼考虑购买歼10,→,藏海传豆瓣开分7.1,↓1,WE淘汰JDG,↓5
 10,豆瓣分型,→,孙恩盛回应撞衫贺峻霖,新上榜,国足首发,↓2,歌手第四期音源,↑3,歌手第四期音源,→,藏海传豆瓣开分7.1,↓2
 11,被咬身亡女子亲属称一定要弄清楚死因,↑17,400块的鞋犹豫了三年,↑1,400块的鞋犹豫了三年,→,400块的鞋犹豫了三年,→,400块的鞋犹豫了三年,→,印尼考虑购买歼10,↓2
 12,400块的鞋犹豫了三年,↑1,李在明边开会边大口吃紫菜包饭,↑1,李在明边开会边大口吃紫菜包饭,→,国足首发,↓2,价值13999元labubu盲盒1元起拍,↓4,400块的鞋犹豫了三年,↓1
@@ -586,6 +586,17 @@
                     const dataItem = hotSearchData.find(item => item.keyword === keyword);
                     
                     if (dataItem) {
+                        // 获取当前时间段的热搜前五名
+                        const currentTimeTop5 = parsedData.slice(0, 5).map(item => {
+                            const keywordHeader = Object.keys(item)[xIndex*2+1];
+                            const trendHeader = Object.keys(item)[xIndex*2+2];
+                            return {
+                                rank: item['排名'],
+                                keyword: item[keywordHeader],
+                                trend: item[trendHeader]
+                            };
+                        });
+                        
                         // 显示完整趋势工具提示
                         let tooltipContent = `<div class="full-trend-title">${keyword}</div>`;
                         
@@ -599,6 +610,18 @@
                                     </div>
                                 `;
                             }
+                        });
+                        
+                        // 添加当前时间段热搜前五名
+                        tooltipContent += `<div class="full-trend-title" style="margin-top:15px;border-top:1px solid #eee;padding-top:10px;">${formattedTimePoints[xIndex]} 热搜前五</div>`;
+                        
+                        currentTimeTop5.forEach(item => {
+                            tooltipContent += `
+                                <div class="full-trend-item">
+                                    <span class="full-trend-rank">${item.rank}. ${item.keyword}</span>
+                                    <span class="full-trend-time">${item.trend}</span>
+                                </div>
+                            `;
                         });
                         
                         fullTrendTooltip.innerHTML = tooltipContent;
