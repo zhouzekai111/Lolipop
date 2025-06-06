@@ -385,9 +385,6 @@
         const myChart = echarts.init(chartDom);
         const fullTrendTooltip = document.getElementById('fullTrendTooltip');
         
-        // 记录当前锁定的系列
-        let lockedSeries = null;
-        
         // 生成关键词系列数据
         const series = [];
         const legendColors = generateSoftColors(hotSearchData.length);
@@ -561,9 +558,6 @@
         
         // 自定义鼠标悬停显示完整趋势
         chartDom.addEventListener('mousemove', (e) => {
-            // 如果有锁定的系列，不处理悬停事件
-            if (lockedSeries) return;
-            
             const pointInPixel = [e.offsetX, e.offsetY];
             const pointInGrid = myChart.convertFromPixel({ seriesIndex: 0 }, pointInPixel);
             
@@ -612,7 +606,7 @@
                         fullTrendTooltip.style.top = `${e.clientY + 15}px`;
                         fullTrendTooltip.style.opacity = '1';
                         
-                        // 高亮当前整条折线
+                        // 高亮当前系列
                         myChart.dispatchAction({
                             type: 'highlight',
                             seriesName: keyword
@@ -631,95 +625,6 @@
             });
         });
         
-        // 添加点击事件处理
-        chartDom.addEventListener('click', (e) => {
-            const pointInPixel = [e.offsetX, e.offsetY];
-            const pointInGrid = myChart.convertFromPixel({ seriesIndex: 0 }, pointInPixel);
-            
-            if (pointInGrid) {
-                const xIndex = pointInGrid[0];
-                const yValue = pointInGrid[1];
-                
-                // 查找最近的系列
-                const series = myChart.getOption().series;
-                let closestSeries = null;
-                let closestDistance = Infinity;
-                
-                series.forEach(s => {
-                    const data = s.data;
-                    if (data[xIndex] !== null && data[xIndex] !== undefined) {
-                        const distance = Math.abs(data[xIndex] - yValue);
-                        if (distance < closestDistance) {
-                            closestDistance = distance;
-                            closestSeries = s;
-                        }
-                    }
-                });
-                
-                if (closestSeries && closestDistance < 5) {
-                    const keyword = closestSeries.name;
-                    
-                    // 如果点击的是已锁定的系列，则取消锁定
-                    if (lockedSeries === keyword) {
-                        lockedSeries = null;
-                        myChart.dispatchAction({
-                            type: 'downplay',
-                            seriesName: 'all'
-                        });
-                        fullTrendTooltip.style.opacity = '0';
-                    } 
-                    // 否则锁定新系列
-                    else {
-                        lockedSeries = keyword;
-                        myChart.dispatchAction({
-                            type: 'highlight',
-                            seriesName: keyword
-                        });
-                        
-                        // 更新工具提示
-                        const dataItem = hotSearchData.find(item => item.keyword === keyword);
-                        if (dataItem) {
-                            let tooltipContent = `<div class="full-trend-title">${keyword}</div>`;
-                            dataItem.trends.forEach((rank, i) => {
-                                if (rank !== null) {
-                                    tooltipContent += `
-                                        <div class="full-trend-item">
-                                            <span class="full-trend-time">${formattedTimePoints[i]}</span>
-                                            <span class="full-trend-rank">第${rank}名 ${dataItem.trendSymbols[i]}</span>
-                                        </div>
-                                    `;
-                                }
-                            });
-                            fullTrendTooltip.innerHTML = tooltipContent;
-                            fullTrendTooltip.style.opacity = '1';
-                        }
-                    }
-                    return;
-                }
-            }
-            
-            // 点击空白处取消锁定
-            if (lockedSeries) {
-                lockedSeries = null;
-                myChart.dispatchAction({
-                    type: 'downplay',
-                    seriesName: 'all'
-                });
-                fullTrendTooltip.style.opacity = '0';
-            }
-        });
-        
-        // 修改鼠标移出事件
-        chartDom.addEventListener('mouseout', (e) => {
-            // 如果没有锁定的系列，才取消高亮
-            if (!lockedSeries) {
-                fullTrendTooltip.style.opacity = '0';
-                myChart.dispatchAction({
-                    type: 'downplay',
-                    seriesName: 'all'
-                });
-            }
-        });
         // 响应式调整
         window.addEventListener('resize', function() {
             myChart.resize();
