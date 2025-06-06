@@ -652,7 +652,7 @@
                             .filter(item => 
                                 item.keyword !== keyword && 
                                 item.trends[xIndex] !== null &&  // 确保有排名数据
-                                typeof item.trends[xIndex] !== 'undefined' // 确保不是undefined
+                                typeof item.trends[xIndex] !== 'undefinded' // 确保不是undefined
                             )
                             .sort((a, b) => a.trends[xIndex] - b.trends[xIndex])
                             .slice(0, 5); // 最多显示5条
