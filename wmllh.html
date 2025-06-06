@@ -1,114 +1,647 @@
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import re  # 用于处理趋势符号
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜趋势动态分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .dashboard {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        #trendChart {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .legend-container {
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .legend-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        
+        .legend-item:hover {
+            background-color: #f0f3f7;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        .search-box {
+            margin-bottom: 15px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-box input:focus {
+            border-color: #3498db;
+        }
+        
+        .full-trend-tooltip {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            max-width: 300px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .full-trend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .full-trend-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .full-trend-time {
+            color: #7f8c8d;
+        }
+        
+        .full-trend-rank {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #95a5a6;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .legend-container {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            #trendChart {
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>微博热搜趋势动态分析</h1>
+            <p class="subtitle">展示2024年6月5日20:46至21:36期间50个热搜关键词的排名变化趋势。鼠标悬停在节点上可查看完整趋势。</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="chart-container">
+                <div id="trendChart"></div>
+                <div class="full-trend-tooltip" id="fullTrendTooltip"></div>
+            </div>
+            
+            <div class="legend-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索关键词...">
+                </div>
+                <div class="legend-title">热搜关键词 (50个)</div>
+                <div class="legend-list" id="legendList"></div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>数据来源：微博热搜榜 | 可视化设计：数据可视化工作室</p>
+            <p>注：排名数值越小表示热度越高（1为最高），空白表示未上榜</p>
+        </footer>
+    </div>
 
-# ----------------------
-# 1. 数据读取与清洗
-# ----------------------
-def clean_trend_value(value):
-    """清洗趋势值，提取数字并转换为整数"""
-    if pd.isna(value):
-        return None
-    # 匹配数字（支持正负号和箭头符号）
-    num = re.search(r'(\+?\d+|\-\d+)', value).group()
-    return int(num)
-
-# 读取CSV文件（处理特殊分隔符和空行）
-df = pd.read_csv(
-    'hourly_summary.csv',
-    delimiter='|',
-    skiprows=1,  # 跳过首行分隔符行
-    engine='python',
-    na_values=['→', '新上榜']  # 将"→"和"新上榜"视为缺失值
-)
-
-# 过滤无效列（保留关键词和趋势列）
-valid_cols = [col for col in df.columns if '关键词' in col or '趋势' in col]
-df = df[valid_cols].dropna(how='all', axis=1)  # 删除全空列
-
-# 重组数据：将关键词和趋势展开为长格式
-data_long = []
-for idx in df.index:
-    for i in range(1, len(df.columns)//2 + 1):  # 假设关键词和趋势成对出现
-        keyword = df[f'关键词_{i}'].iloc[idx]
-        trend = df[f'趋势_{i}'].iloc[idx]
-        if pd.notna(keyword) and pd.notna(trend):
-            data_long.append({
-                '关键词': keyword,
-                '时间点': f'趋势_{i}',
-                '排名': clean_trend_value(trend)
-            })
-
-# 转换为DataFrame
-clean_df = pd.DataFrame(data_long)
-clean_df['排名'] = clean_df['排名'].astype('Int64')  # 允许缺失值的整数类型
-
-# ----------------------
-# 2. 生成动态折线图
-# ----------------------
-# 创建子图
-fig = make_subplots(
-    rows=1, 
-    cols=1, 
-    title="关键词排名趋势动态图",
-    x_title="时间点",
-    y_title="排名变化（↑/↓数值）"
-)
-
-# 提取所有唯一关键词
-keywords = clean_df['关键词'].unique()
-
-# 为每个关键词添加折线轨迹
-for keyword in keywords:
-    keyword_df = clean_df[clean_df['关键词'] == keyword].sort_values('时间点')
-    
-    # 处理缺失值（用前值填充，或跳过）
-    keyword_df['排名'] = keyword_df['排名'].ffill()  # 向前填充缺失值
-    
-    fig.add_trace(
-        go.Scatter(
-            x=keyword_df['时间点'],
-            y=keyword_df['排名'],
-            mode='lines+markers',
-            name=keyword,
-            hovertemplate=(
-                f'关键词：<b>{keyword}</b><br>' +
-                '时间点：%{x}<br>' +
-                '排名变化：%{y}<br>' +
-                '<extra></extra>'  # 隐藏额外信息
-            ),
-            line=dict(width=2),
-            marker=dict(size=6),
-            opacity=0.8
-        )
-    )
-
-# 配置交互与样式
-fig.update_layout(
-    width=1200,
-    height=700,
-    font=dict(family='微软雅黑', size=12),
-    hovermode='x unified',  # 统一x轴悬停高亮
-    showlegend=True,
-    legend=dict(x=0, y=1, orientation='h'),  # 图例位置
-    xaxis=dict(
-        tickmode='linear',
-        tickangle=45,
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='#e0e0e0'
-    ),
-    yaxis=dict(
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='#e0e0e0',
-        zeroline=False
-    )
-)
-
-# ----------------------
-# 3. 生成动态网页
-# ----------------------
-fig.write_html('keyword_trend.html', auto_open=True)
-print("动态网页已生成：keyword_trend.html")
+    <script>
+        // 解析CSV数据
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',');
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i]) continue;
+                
+                const obj = {};
+                const currentline = lines[i].split(',');
+                
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j];
+                }
+                
+                result.push(obj);
+            }
+            
+            return result;
+        }
+        
+        // 从CSV中提取热搜数据
+        function extractHotSearchData(csvData) {
+            const hotSearchData = [];
+            
+            // 获取时间点
+            const timePoints = [];
+            for (let i = 1; i <= 6; i++) {
+                const timeHeader = Object.keys(csvData[0])[i*2-1];
+                timePoints.push(timeHeader.split('_')[1]);
+            }
+            
+            // 提取每个关键词的趋势数据
+            const keywordMap = new Map();
+            
+            csvData.forEach(row => {
+                const rank = row['排名'];
+                
+                for (let i = 1; i <= 6; i++) {
+                    const keywordHeader = Object.keys(row)[i*2-1];
+                    const trendHeader = Object.keys(row)[i*2];
+                    
+                    const keyword = row[keywordHeader];
+                    const trend = row[trendHeader];
+                    
+                    if (!keyword || keyword === '') continue;
+                    
+                    if (!keywordMap.has(keyword)) {
+                        keywordMap.set(keyword, {
+                            keyword: keyword,
+                            trends: Array(6).fill(null),
+                            trendSymbols: Array(6).fill('')
+                        });
+                    }
+                    
+                    const data = keywordMap.get(keyword);
+                    data.trends[i-1] = parseInt(rank);
+                    data.trendSymbols[i-1] = trend;
+                }
+            });
+            
+            // 转换为数组并按首次出现排名排序
+            const result = Array.from(keywordMap.values());
+            result.sort((a, b) => {
+                const aFirstRank = a.trends.find(rank => rank !== null);
+                const bFirstRank = b.trends.find(rank => rank !== null);
+                return (aFirstRank || 51) - (bFirstRank || 51);
+            });
+            
+            return {
+                timePoints: timePoints,
+                hotSearchData: result
+            };
+        }
+        
+        // CSV数据
+        const csvData = `排名,20250605_204604_关键词,20250605_204604_趋势,20250605_205604_关键词,20250605_205604_趋势,20250605_210605_关键词,20250605_210605_趋势,20250605_211605_关键词,20250605_211605_趋势,20250605_212605_关键词,20250605_212605_趋势,20250605_213606_关键词,20250605_213606_趋势
+1,悬赏通缉20名台湾黑客,→,悬赏通缉20名台湾黑客,→,悬赏通缉20名台湾黑客,→,悬赏通缉20名台湾黑客,→,悬赏通缉20名台湾黑客,→,悬赏通缉20名台湾黑客,→
+2,光与夜之恋偷跑,↑4,WE淘汰JDG,↑5,WE淘汰JDG,→,WE淘汰JDG,→,孙恩盛回应撞衫贺峻霖,↑2,孙恩盛回应撞衫贺峻霖,→
+3,数说美丽中国新画卷,→,数说美丽中国新画卷,→,数说美丽中国新画卷,→,数说美丽中国新画卷,→,数说美丽中国新画卷,→,数说美丽中国新画卷,→
+4,清凉新品满99减10,新上榜,光与夜之恋偷跑,↓2,光与夜之恋偷跑,→,孙恩盛回应撞衫贺峻霖,↑1,WE淘汰JDG,↓2,NBA总决赛预言家,新上榜
+5,女子临床死亡后父亲要求继续抢救,→,藏海传豆瓣开分7.1,↑1,孙恩盛回应撞衫贺峻霖,↑5,光与夜之恋偷跑,↓1,光与夜之恋偷跑,→,中美元首6月5日通电话,↑2
+6,藏海传豆瓣开分7.1,↓4,女子临床死亡后父亲要求继续抢救,↓1,女子临床死亡后父亲要求继续抢救,→,女子临床死亡后父亲要求继续抢救,→,女子临床死亡后父亲要求继续抢救,→,光与夜之恋偷跑,↓1
+7,WE淘汰JDG,新上榜,价值13999元labubu盲盒1元起拍,↑1,藏海传豆瓣开分7.1,↓2,藏海传豆瓣开分7.1,→,中美元首6月5日通电话,新上榜,女子临床死亡后父亲要求继续抢救,↓1
+8,价值13999元labubu盲盒1元起拍,↑12,国足首发,↑1,价值13999元labubu盲盒1元起拍,↓1,价值13999元labubu盲盒1元起拍,→,藏海传豆瓣开分7.1,↓1,国足vs印尼,↑40
+9,国足首发,→,WE对战JDG,↑5,印尼考虑购买歼10,↑14,印尼考虑购买歼10,→,印尼考虑购买歼10,→,WE淘汰JDG,↓5
+10,豆瓣分型,→,孙恩盛回应撞衫贺峻霖,新上榜,国足首发,↓2,歌手第四期音源,↑3,歌手第四期音源,→,藏海传豆瓣开分7.1,↓2
+11,被咬身亡女子亲属称一定要弄清楚死因,↑17,400块的鞋犹豫了三年,↑1,400块的鞋犹豫了三年,→,400块的鞋犹豫了三年,→,400块的鞋犹豫了三年,→,印尼考虑购买歼10,↓2
+12,400块的鞋犹豫了三年,↑1,李在明边开会边大口吃紫菜包饭,↑1,李在明边开会边大口吃紫菜包饭,→,国足首发,↓2,价值13999元labubu盲盒1元起拍,↓4,400块的鞋犹豫了三年,↓1
+13,李在明边开会边大口吃紫菜包饭,↑1,以为没事可能是糖尿病的早期症状,↑6,歌手第四期音源,↑3,以为没事可能是糖尿病的早期症状,↑1,以为没事可能是糖尿病的早期症状,→,歌手第四期音源,↓3
+14,WE对战JDG,↓7,赵丽颖在人间开分6.7,↑1,以为没事可能是糖尿病的早期症状,↓1,尹正隔空跟冯小刚道歉,↑5,樊振东祝福所有高考生,新上榜,肖战的口碑,↑3
+15,赵丽颖在人间开分6.7,↓3,豆瓣分型,↓5,WE对战JDG,↓6,赵丽颖在人间开分6.7,↑1,女子疑被蛇咬医院治疗后称无经验,↑3,加州高铁烧70亿美金15年没铺一条轨,新上榜
+16,有店铺紫色内裤周销量上涨10倍,↑1,歌手第四期音源,↑16,赵丽颖在人间开分6.7,↓2,歌手第四期陪看团官宣,新上榜,赵丽颖在人间开分6.7,↓1,女子疑被蛇咬医院治疗后称无经验,↓1
+17,何秋亊 没EXO版权,↑2,易烊千玺新EP,↑1,何秋亊 没EXO版权,↑5,苏超爆火下的文旅新现象,新上榜,肖战的口碑,↑9,赵丽颖在人间开分6.7,↓1
+18,易烊千玺新EP,→,央视转播苏超,↑6,女孩遭体罚去世3人涉嫌虐待罪被拘留,↑1,女子疑被蛇咬医院治疗后称无经验,新上榜,国足首发,↓6,饶雪漫选角求助,↑14
+19,以为没事可能是糖尿病的早期症状,↓8,女孩遭体罚去世3人涉嫌虐待罪被拘留,↑3,尹正隔空跟冯小刚道歉,↑13,长期喝咖啡的人身体会更健康吗,↑1,歌手第四期陪看团官宣,↓3,苏超1个省踢出13省PK的感觉,新上榜
+20,尹正隔空跟冯小刚道歉,新上榜,长期喝咖啡的人身体会更健康吗,↑6,长期喝咖啡的人身体会更健康吗,→,下一个能抄苏超作业的省份会是谁,↑12,下一个能抄苏超作业的省份会是谁,→,男子嫌球馆太吵喷洒干粉灭火器,新上榜
+21,老年痴呆父亲住院被精神病患挖伤双眼,→,21岁女子抗癌2年后发现误诊,↑2,央视转播苏超,↓3,21岁女子抗癌2年后发现误诊,↑1,21岁女子抗癌2年后发现误诊,→,国足今晚对战印尼能进几个,↑4
+22,女孩遭体罚去世3人涉嫌虐待罪被拘留,↓7,何秋亊 没EXO版权,↓5,21岁女子抗癌2年后发现误诊,↓1,何秋亊 没EXO版权,↓5,央行将开展1万亿买断式逆回购操作,↑10,价值13999元labubu盲盒1元起拍,↓10
+23,21岁女子抗癌2年后发现误诊,→,印尼考虑购买歼10,↑15,肖战的口碑,↑1,女孩遭体罚去世3人涉嫌虐待罪被拘留,↓5,校方回应王皓竞聘体校教练员岗,↑1,老师因学生错过清华惋惜落泪,↑3
+24,央视转播苏超,↓8,肖战的口碑,↑4,中国女排vs波兰女排,↑11,校方回应王皓竞聘体校教练员岗,↑4,退钱哥预测今晚比分0比0,↑1,21岁女子抗癌2年后发现误诊,↓3
+25,校方回应王皓竞聘体校教练员岗,↑2,俱乐部经理称樊振东加盟反响疯狂,新上榜,俱乐部经理称樊振东加盟反响疯狂,→,退钱哥预测今晚比分0比0,新上榜,国足今晚对战印尼能进几个,新上榜,以为没事可能是糖尿病的早期症状,↓12
+26,长期喝咖啡的人身体会更健康吗,新上榜,可妈可爸道歉,↑1,豆瓣分型,↓11,肖战的口碑,↓3,老师因学生错过清华惋惜落泪,↑11,央行将开展1万亿买断式逆回购操作,↓4
+27,可妈可爸道歉,↓3,王楚钦对梁靖崑喊了一声梁甜甜,↑2,易烊千玺新EP,↓10,WE对战JDG,↓12,尹正隔空跟冯小刚道歉,↓13,钟镇涛女儿出道,↑10
+28,肖战的口碑,↑3,张博恒祝愿高考学子金榜题名,新上榜,校方回应王皓竞聘体校教练员岗,↑3,江映蓉牛蛙背,↑8,女孩遭体罚去世3人涉嫌虐待罪被拘留,↓5,国足首发,↓10
+29,王楚钦对梁靖崑喊了一声梁甜甜,↑5,拆迁款被亲属代领避债,↑2,可妈可爸道歉,↓3,饶雪漫选角求助,↑10,何秋亊 没EXO版权,↓7,逆风小胖会出手,新上榜
+30,丁禹兮 不吃等于白来,↑8,蛇药哪里买怎么用,↑4,蛇药哪里买怎么用,→,蛇药哪里买怎么用,→,中国女排vs波兰女排,↑4,曹骏不后悔在事业巅峰时退圈念书,新上榜
+31,拆迁款被亲属代领避债,↑9,校方回应王皓竞聘体校教练员岗,↓6,王楚钦对梁靖崑喊了一声梁甜甜,↓4,AG对战UUG,↑4,江映蓉牛蛙背,↓3,厦门一男子在线帮判断毒蛇伤口,新上榜
+32,歌手第四期音源,↑1,尹正隔空跟冯小刚道歉,↓12,下一个能抄苏超作业的省份会是谁,新上榜,央行将开展1万亿买断式逆回购操作,↑10,饶雪漫选角求助,↓3,樊振东祝福所有高考生,↓18
+33,杨幂 承认自己不完美不需要勇气,↓4,被咬身亡女子亲属称一定要弄清楚死因,↓22,被咬身亡女子亲属称一定要弄清楚死因,→,央视转播苏超,↓12,歌手,新上榜,江映蓉牛蛙背,↓2
+34,蛇药哪里买怎么用,新上榜,市监局对星巴克疑喝出蟑螂不予立案,新上榜,拆迁款被亲属代领避债,↓5,中国女排vs波兰女排,↓10,易烊千玺新EP,↑1,校方回应王皓竞聘体校教练员岗,↓11
+35,朝鲜驱逐舰已被扶正,↓10,中国女排vs波兰女排,↑1,AG对战UUG,新上榜,易烊千玺新EP,↓8,央视频懂球帝紧急开设苏超频道,↑5,歌手,↓2
+36,中国女排vs波兰女排,↓10,汪苏泷涨粉,↑1,江映蓉牛蛙背,↑3,王楚钦对梁靖崑喊了一声梁甜甜,↓5,王楚钦对梁靖崑喊了一声梁甜甜,→,中国女排vs波兰女排,↓6
+37,汪苏泷涨粉,↑4,朝鲜驱逐舰已被扶正,↓2,汪苏泷涨粉,↓1,老师因学生错过清华惋惜落泪,↑7,钟镇涛女儿出道,↑8,何秋亊 没EXO版权,↓8
+38,印尼考虑购买歼10,新上榜,有店铺紫色内裤周销量上涨10倍,↓22,朝鲜驱逐舰已被扶正,↓1,有店铺紫色内裤周销量上涨10倍,↑3,WE对战JDG,↓11,尹正隔空跟冯小刚道歉,↓11
+39,披荆斩棘5阵容,↓9,江映蓉牛蛙背,新上榜,饶雪漫选角求助,↑9,豆瓣分型,↓13,有店铺紫色内裤周销量上涨10倍,↓1,女孩遭体罚去世3人涉嫌虐待罪被拘留,↓11
+40,吴克群在云南被认成伍佰,↓8,刘耀文邀请宋亚轩一起爬山,↑1,刘耀文邀请宋亚轩一起爬山,→,央视频懂球帝紧急开设苏超频道,新上榜,央视转播苏超,↓7,国足直播,↑2
+41,刘耀文邀请宋亚轩一起爬山,↑2,杨幂 承认自己不完美不需要勇气,↓8,有店铺紫色内裤周销量上涨10倍,↓3,可妈可爸道歉,↓12,夏雨支持王一博滑滑板,↑2,易烊千玺新EP,↓7
+42,missing选猫,新上榜,披荆斩棘5阵容,↓3,央行将开展1万亿买断式逆回购操作,新上榜,刘耀文邀请宋亚轩一起爬山,↓2,国足直播,↑6,王楚钦对梁靖崑喊了一声梁甜甜,↓6
+43,蔡依林说新专团队像NBA,↑3,歌手歌单,↑1,披荆斩棘5阵容,↓1,夏雨支持王一博滑滑板,新上榜,听蔡徐坤新歌遇见蓝调北京,↑6,汪苏泷涨粉,↑2
+44,歌手歌单,↓8,谁懂考试前一晚的含金量,新上榜,老师因学生错过清华惋惜落泪,新上榜,汪苏泷涨粉,↓7,刘耀文邀请宋亚轩一起爬山,↓2,WE对战JDG,↓6
+45,减肥控制饮食比运动更重要吗,↓23,大坑沙独游失联23岁女子已身亡,↑2,谁懂考试前一晚的含金量,↓1,钟镇涛女儿出道,新上榜,汪苏泷涨粉,↓1,业内预估国产九价价格约进口的70%,新上榜
+46,王自如将回应离开格力,↓9,老年痴呆父亲住院被精神病患挖伤双眼,↓25,高考加油,新上榜,高考加油,→,长期喝咖啡的人身体会更健康吗,↓27,下一个能抄苏超作业的省份会是谁,↓26
+47,大坑沙独游失联23岁女子已身亡,新上榜,missing选猫,↓5,歌手歌单,↓4,朝鲜驱逐舰已被扶正,↓9,蛇药哪里买怎么用,↓17,央视频懂球帝紧急开设苏超频道,↓12
+48,高考加油,↓1,饶雪漫选角求助,新上榜,scout 隐身,新上榜,国足直播,新上榜,国足vs印尼,新上榜,听蔡徐坤新歌遇见蓝调北京,↓5
+49,央视频懂球帝紧急开设苏超频道,↓14,蔡依林说新专团队像NBA,↓6,杨幂 承认自己不完美不需要勇气,↓8,听蔡徐坤新歌遇见蓝调北京,新上榜,高考加油,↓3,有店铺紫色内裤周销量上涨10倍,↓10
+50,国足 苏超,↓1,台军一蛙兵热身时溺水,新上榜,大坑沙独游失联23岁女子已身亡,↓5,披荆斩棘5阵容,↓7,豆瓣分型,↓11,刘耀文邀请宋亚轩一起爬山,↓6`;
+        
+        // 解析数据
+        const parsedData = parseCSV(csvData);
+        const { timePoints, hotSearchData } = extractHotSearchData(parsedData);
+        
+        // 格式化时间点显示
+        const formattedTimePoints = timePoints.map(time => {
+            const hour = time.substring(8, 10);
+            const minute = time.substring(10, 12);
+            return `${hour}:${minute}`;
+        });
+        
+        // 生成颜色 - 使用柔和色调
+        function generateSoftColors(count) {
+            const colors = [];
+            const hueStep = 360 / Math.min(count, 24); // 24种色调循环
+            
+            for (let i = 0; i < count; i++) {
+                const hue = (i * hueStep) % 360;
+                colors.push(`hsl(${hue}, 50%, 60%)`);
+            }
+            
+            return colors;
+        }
+        
+        // 初始化图表
+        const chartDom = document.getElementById('trendChart');
+        const myChart = echarts.init(chartDom);
+        const fullTrendTooltip = document.getElementById('fullTrendTooltip');
+        
+        // 生成关键词系列数据
+        const series = [];
+        const legendColors = generateSoftColors(hotSearchData.length);
+        
+        hotSearchData.forEach((item, index) => {
+            series.push({
+                name: item.keyword,
+                type: 'line',
+                data: item.trends,
+                symbol: 'circle',
+                symbolSize: 6,
+                lineStyle: {
+                    width: 2
+                },
+                itemStyle: {
+                    color: legendColors[index]
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: '#fff',
+                        borderColor: legendColors[index],
+                        borderWidth: 2
+                    },
+                    lineStyle: {
+                        width: 3
+                    }
+                },
+                connectNulls: false
+            });
+        });
+        
+        // 创建图例
+        const legendList = document.getElementById('legendList');
+        hotSearchData.forEach((item, index) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `
+                <div class="legend-color" style="background: ${legendColors[index]};"></div>
+                <span>${item.keyword}</span>
+            `;
+            
+            legendItem.addEventListener('click', () => {
+                const option = myChart.getOption();
+                const selected = option.legend[0].selected || {};
+                const newSelected = {...selected, [item.keyword]: !selected[item.keyword]};
+                
+                myChart.setOption({
+                    legend: {
+                        selected: newSelected
+                    }
+                });
+            });
+            
+            legendList.appendChild(legendItem);
+        });
+        
+        // 搜索功能
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const legendItems = document.querySelectorAll('.legend-item');
+            
+            legendItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    // 高亮匹配的词条
+                    const keyword = item.querySelector('span').textContent;
+                    myChart.dispatchAction({
+                        type: 'highlight',
+                        seriesName: keyword
+                    });
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // 配置图表选项
+        const option = {
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: '#ddd',
+                borderWidth: 1,
+                textStyle: {
+                    color: '#333',
+                    fontSize: 12
+                },
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                formatter: function(params) {
+                    let result = `<div style="font-weight:bold;margin-bottom:5px;color:#2c3e50;">${params[0].axisValue}</div>`;
+                    params.forEach(param => {
+                        if (param.value === null) return;
+                        const value = `第${param.value}名`;
+                        result += `
+                            <div style="display:flex;align-items:center;margin:3px 0;font-size:11px;color:#7f8c8d;">
+                                <div style="width:10px;height:10px;border-radius:50%;background:${param.color};margin-right:6px;"></div>
+                                ${param.seriesName}: <span style="color:#2c3e50;margin-left:3px;">${value}</span>
+                            </div>
+                        `;
+                    });
+                    return result;
+                }
+            },
+            legend: {
+                show: true,
+                type: 'scroll',
+                orient: 'horizontal',
+                bottom: 0,
+                textStyle: {
+                    color: '#7f8c8d',
+                    fontSize: 10
+                },
+                pageTextStyle: {
+                    color: '#95a5a6'
+                },
+                pageIconColor: '#95a5a6',
+                pageIconInactiveColor: '#ddd',
+                pageIconSize: 10,
+                pageButtonItemGap: 3,
+                pageButtonGap: 3
+            },
+            grid: {
+                left: '3%',
+                right: '3%',
+                bottom: '15%',
+                top: '5%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: formattedTimePoints,
+                axisLine: {
+                    lineStyle: {
+                        color: '#ddd'
+                    }
+                },
+                axisLabel: {
+                    color: '#7f8c8d',
+                    fontSize: 11
+                },
+                axisTick: {
+                    show: false
+                }
+            },
+            yAxis: {
+                type: 'value',
+                inverse: true,
+                min: 1,
+                max: 50,
+                axisLabel: {
+                    color: '#7f8c8d',
+                    fontSize: 11,
+                    formatter: function(value) {
+                        return value === 50 ? '50+' : value;
+                    }
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#ddd'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                name: '排名',
+                nameTextStyle: {
+                    color: '#95a5a6',
+                    fontSize: 11,
+                    padding: [0, 0, 0, -30]
+                }
+            },
+            series: series,
+            animation: true,
+            animationDuration: 1000,
+            animationEasing: 'cubicOut'
+        };
+        
+        // 应用配置项
+        myChart.setOption(option);
+        
+        // 自定义鼠标悬停显示完整趋势
+        chartDom.addEventListener('mousemove', (e) => {
+            const pointInPixel = [e.offsetX, e.offsetY];
+            const pointInGrid = myChart.convertFromPixel({ seriesIndex: 0 }, pointInPixel);
+            
+            if (pointInGrid) {
+                const xIndex = pointInGrid[0];
+                const yValue = pointInGrid[1];
+                
+                // 查找最近的系列
+                const series = myChart.getOption().series;
+                let closestSeries = null;
+                let closestDistance = Infinity;
+                
+                series.forEach(s => {
+                    const data = s.data;
+                    if (data[xIndex] !== null && data[xIndex] !== undefined) {
+                        const distance = Math.abs(data[xIndex] - yValue);
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            closestSeries = s;
+                        }
+                    }
+                });
+                
+                if (closestSeries && closestDistance < 5) {
+                    const keyword = closestSeries.name;
+                    const dataItem = hotSearchData.find(item => item.keyword === keyword);
+                    
+                    if (dataItem) {
+                        // 显示完整趋势工具提示
+                        let tooltipContent = `<div class="full-trend-title">${keyword}</div>`;
+                        
+                        dataItem.trends.forEach((rank, i) => {
+                            if (rank !== null) {
+                                tooltipContent += `
+                                    <div class="full-trend-item">
+                                        <span class="full-trend-time">${formattedTimePoints[i]}</span>
+                                        <span class="full-trend-rank">第${rank}名 ${dataItem.trendSymbols[i]}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                        
+                        fullTrendTooltip.innerHTML = tooltipContent;
+                        fullTrendTooltip.style.left = `${e.clientX + 15}px`;
+                        fullTrendTooltip.style.top = `${e.clientY + 15}px`;
+                        fullTrendTooltip.style.opacity = '1';
+                        
+                        // 高亮当前系列
+                        myChart.dispatchAction({
+                            type: 'highlight',
+                            seriesName: keyword
+                        });
+                        
+                        return;
+                    }
+                }
+            }
+            
+            // 没有匹配的系列时隐藏工具提示
+            fullTrendTooltip.style.opacity = '0';
+            myChart.dispatchAction({
+                type: 'downplay',
+                seriesName: 'all'
+            });
+        });
+        
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
