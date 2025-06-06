@@ -651,8 +651,7 @@
                         const sameTimeData = hotSearchData
                             .filter(item => 
                                 item.keyword !== keyword && 
-                                item.trends[xIndex] !== null &&  // 确保有排名数据
-                                typeof item.trends[xIndex] !== 'undefinded' // 确保不是undefined
+                                item.trends[xIndex] !== null
                             )
                             .sort((a, b) => a.trends[xIndex] - b.trends[xIndex])
                             .slice(0, 5); // 最多显示5条
@@ -682,7 +681,7 @@
                         
                         // 高亮当前系列
                         myChart.dispatchAction({
-                            type: 'highlight','bold',
+                            type: 'highlight',
                             seriesName: keyword
                         });
                         
