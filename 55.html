@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>舞园沙耶香 - 超高校级的偶像</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff6b9d', // 粉色系主色调，符合偶像气质
+                        secondary: '#6a5acd', // 紫色辅助色
+                        accent: '#ffd1dc', // 浅色点缀
+                        dark: '#2d2d2d', // 深色文本
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif']
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .card-hover {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(255,107,157,0.2);
+            }
+            .bg-gradient-idol {
+                background: linear-gradient(135deg, #ff6b9d 0%, #6a5acd 100%);
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.8s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-dark font-sans">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-display font-bold text-primary flex items-center">
+                <i class="fa fa-music mr-2"></i>舞园沙耶香
+            </a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#intro" class="font-medium hover:text-primary transition-colors">简介</a>
+                <a href="#appearance" class="font-medium hover:text-primary transition-colors">外观</a>
+                <a href="#personality" class="font-medium hover:text-primary transition-colors">性格</a>
+                <a href="#background" class="font-medium hover:text-primary transition-colors">背景</a>
+                <a href="#gallery" class="font-medium hover:text-primary transition-colors">形象 gallery</a>
+            </nav>
+            <button class="md:hidden text-dark focus:outline-none" id="menu-toggle">
+                <i class="fa fa-bars text-2xl"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t animate-fade-in">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#intro" class="py-2 font-medium hover:text-primary transition-colors">简介</a>
+                <a href="#appearance" class="py-2 font-medium hover:text-primary transition-colors">外观</a>
+                <a href="#personality" class="py-2 font-medium hover:text-primary transition-colors">性格</a>
+                <a href="#background" class="py-2 font-medium hover:text-primary transition-colors">背景</a>
+                <a href="#gallery" class="py-2 font-medium hover:text-primary transition-colors">形象 gallery</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区 -->
+    <section class="pt-24 md:pt-32 bg-gradient-idol text-white">
+        <div class="container mx-auto px-4 py-12 md:py-20 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-display font-bold leading-tight text-shadow mb-4">
+                    舞園 沙耶香<br><span class="text-accent">超高校級のアイドル</span>
+                </h1>
+                <p class="text-lg md:text-xl mb-8 max-w-lg">
+                    以其甜美歌声和舞台魅力征服无数粉丝的天才偶像，在希望之峰学园中绽放独特光芒。
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#intro" class="bg-white text-primary px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                        了解更多 <i class="fa fa-arrow-down ml-2"></i>
+                    </a>
+                    <a href="#gallery" class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-full font-medium hover:bg-white/10 transition-all">
+                        查看形象 <i class="fa fa-image ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center animate-fade-in" style="animation-delay: 0.3s">
+                <img src="https://picsum.photos/id/64/600/800" alt="舞园沙耶香角色立绘" class="w-full max-w-md rounded-2xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
+            </div>
+        </div>
+    </section>
+
+    <!-- 简介部分 -->
+    <section id="intro" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-display font-bold text-dark mb-4">
+                    <i class="fa fa-star text-primary mr-3"></i>角色简介
+                </h2>
+                <div class="w-20 h-1 bg-primary mx-auto"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md card-hover">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fa fa-user text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-center mb-3">基本信息</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex justify-between"><span class="font-medium">日文名：</span>舞園 沙耶香</li>
+                        <li class="flex justify-between"><span class="font-medium">英文名：</span>Sayaka Maizono</li>
+                        <li class="flex justify-between"><span class="font-medium">生日：</span>3月2日</li>
+                        <li class="flex justify-between"><span class="font-medium">身高：</span>160cm</li>
+                        <li class="flex justify-between"><span class="font-medium">体重：</span>42kg</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md card-hover md:col-span-2">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto md:mx-0 md:mb-0 md:mr-6 float-left">
+                        <i class="fa fa-info-circle text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">角色概述</h3>
+                    <p class="text-gray-700 mb-4 leading-relaxed">
+                        舞园沙耶香是希望之峰学园第78期学生，以「超高校级的偶像」身份入学。作为全国知名偶像组合「甜蜜子弹」的中心成员，她凭借清澈的歌声、精湛的舞蹈和治愈系笑容成为无数年轻人的精神支柱。
+                    </p>
+                    <p class="text-gray-700 mb-4 leading-relaxed">
+                        在希望之峰学园的「绝望游戏」中，她展现出与偶像外表不同的坚韧内心，面对极端压力时的选择引发了深刻的人性思考。她的故事既是偶像的成长史，也是在绝望中寻找希望的挣扎录。
+                    </p>
+                    <div class="mt-6 bg-primary/5 p-4 rounded-lg border-l-4 border-primary">
+                        <p class="font-medium text-primary mb-1">经典台词：</p>
+                        <p class="italic">"如果能和大家一起毕业，像普通学生一样度过青春，那该有多好啊..."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 外观部分 -->
+    <section id="appearance" class="py-16 md:py-24 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-display font-bold text-dark mb-4">
+                    <i class="fa fa-image text-primary mr-3"></i>外观特征
+                </h2>
+                <div class="w-20 h-1 bg-primary mx-auto"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="animate-fade-in">
+                    <h3 class="text-xl font-bold mb-6">视觉形象解析</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fa fa-hair text-primary mr-2"></i>发型与发色
+                            </h4>
+                            <p class="text-gray-700">
+                                沙耶香拥有一头标志性的粉色长卷发，发梢微微上翘，左侧头发用红色蝴蝶结发饰固定，展现出偶像的甜美感。刘海分为两部分，覆盖额头的同时露出饱满的额头线条，增添清纯气质。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fa fa-eye text-primary mr-2"></i>瞳色与妆容
+                            </h4>
+                            <p class="text-gray-700">
+                                她的瞳孔是温柔的粉色，眼妆以自然系为主，强调眼部的明亮感。舞台妆会增加闪亮眼影和假睫毛，突出偶像的华丽感；日常造型则偏向清新裸妆，展现少女的天然魅力。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fa fa-tshirt text-primary mr-2"></i>服装风格
+                            </h4>
+                            <p class="text-gray-700">
+                                日常穿着希望之峰学园的女生制服，搭配白色衬衫和红色领结，下身是百褶裙与白色长袜。舞台服装则以闪亮元素为主，常穿粉色系连衣裙搭配过膝靴，设计上融入蝴蝶结、蕾丝等少女感元素。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="grid grid-cols-2 gap-4">
+                        <img src="https://picsum.photos/id/237/400/600" alt="舞园沙耶香制服形象" class="rounded-xl shadow-lg w-full h-64 object-cover hover:scale-105 transition-transform">
+                        <img src="https://picsum.photos/id/91/400/600" alt="舞园沙耶香舞台形象" class="rounded-xl shadow-lg w-full h-64 object-cover hover:scale-105 transition-transform">
+                        <img src="https://picsum.photos/id/65/400/600" alt="舞园沙耶香休闲形象" class="rounded-xl shadow-lg w-full h-64 object-cover hover:scale-105 transition-transform">
+                        <img src="https://picsum.photos/id/26/400/600" alt="舞园沙耶香插画形象" class="rounded-xl shadow-lg w-full h-64 object-cover hover:scale-105 transition-transform">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 性格部分 -->
+    <section id="personality" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-display font-bold text-dark mb-4">
+                    <i class="fa fa-heart text-primary mr-3"></i>性格与特质
+                </h2>
+                <div class="w-20 h-1 bg-primary mx-auto"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-primary/5 p-6 rounded-xl shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fa fa-smile-o text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-center mb-4">公众形象</h3>
+                    <p class="text-gray-700 text-center">
+                        作为国民偶像，沙耶香在镜头前始终保持甜美开朗的形象，待人接物礼貌周到，擅长用笑容感染他人，被粉丝称为「治愈系天使」。
+                    </p>
+                </div>
+                
+                <div class="bg-primary/5 p-6 rounded-xl shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fa fa-user-secret text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-center mb-4">真实内心</h3>
+                    <p class="text-gray-700 text-center">
+                        私下里她内心敏感细腻，对自己要求极高，常常因担心辜负粉丝期待而感到压力。在困境中会展现出意想不到的坚强和决断力。
+                    </p>
+                </div>
+                
+                <div class="bg-primary/5 p-6 rounded-xl shadow-md card-hover">
+                    <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fa fa-star-o text-xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-center mb-4">核心特质</h3>
+                    <ul class="space-y-2 text-gray-700 text-center">
+                        <li>✓ 强烈的责任感</li>
+                        <li>✓ 关键时刻的决断力</li>
+                        <li>✓ 对朋友的深厚情感</li>
+                        <li>✓ 隐藏在甜美外表下的坚韧</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-gray-50 p-8 rounded-2xl animate-fade-in">
+                <h3 class="text-2xl font-bold text-center mb-6">性格对比分析</h3>
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-primary/10 text-center">
+                            <th class="py-3 px-4 border border-gray-200">场景</th>
+                            <th class="py-3 px-4 border border-gray-200">公开表现</th>
+                            <th class="py-3 px-4 border border-gray-200">真实想法</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <tr class="hover:bg-primary/5 transition-colors">
+                            <td class="py-3 px-4 border border-gray-200">舞台表演</td>
+                            <td class="py-3 px-4 border border-gray-200">活力四射，笑容满分</td>
+                            <td class="py-3 px-4 border border-gray-200">担心失误，渴望完美呈现</td>
+                        </tr>
+                        <tr class="hover:bg-primary/5 transition-colors">
+                            <td class="py-3 px-4 border border-gray-200">粉丝见面会</td>
+                            <td class="py-3 px-4 border border-gray-200">亲切互动，满足所有请求</td>
+                            <td class="py-3 px-4 border border-gray-200">疲惫但不愿让粉丝失望</td>
+                        </tr>
+                        <tr class="hover:bg-primary/5 transition-colors">
+                            <td class="py-3 px-4 border border-gray-200">危机时刻</td>
+                            <td class="py-3 px-4 border border-gray-200">努力维持镇定</td>
+                            <td class="py-3 px-4 border border-gray-200">内心恐惧但强迫自己冷静</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- 背景故事 -->
+    <section id="background" class="py-16 md:py-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-display font-bold text-dark mb-4">
+                    <i class="fa fa-book text-primary mr-3"></i>背景与经历
+                </h2>
+                <div class="w-20 h-1 bg-primary mx-auto"></div>
+            </div>
+            
+            <div class="relative">
+                <!-- 时间线 -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-primary/20 md:w-2"></div>
+                
+                <div class="space-y-12 relative">
+                    <!-- 时间点1 -->
+                    <div class="flex flex-col md:flex-row items-center animate-fade-in">
+                        <div class="order-2 md:order-1 w-full md:w-1/2 md:pr-12 text-right mb-6 md:mb-0">
+                            <h3 class="text-xl font-bold text-primary mb-2">童年时期</h3>
+                            <p class="text-gray-700">
+                                出生于普通家庭，从小对音乐和舞蹈表现出浓厚兴趣。受母亲影响开始学习钢琴和芭蕾，梦想成为像母亲一样的歌唱家。
+                            </p>
+                        </div>
+                        <div class="order-1 md:order-2 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10 shadow-lg">
+                            <i class="fa fa-child text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- 时间点2 -->
+                    <div class="flex flex-col md:flex-row-reverse items-center animate-fade-in" style="animation-delay: 0.2s">
+                        <div class="order-2 md:order-1 w-full md:w-1/2 md:pl-12 mb-6 md:mb-0">
+                            <h3 class="text-xl font-bold text-primary mb-2">偶像出道</h3>
+                            <p class="text-gray-700">
+                                12岁时通过大型选秀节目脱颖而出，加入偶像组合「甜蜜子弹」成为中心成员。首张单曲《星之旋律》登顶各大音乐榜单，迅速成为国民级偶像。
+                            </p>
+                        </div>
+                        <div class="order-1 md:order-2 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10 shadow-lg">
+                            <i class="fa fa-microphone text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- 时间点3 -->
+                    <div class="flex flex-col md:flex-row items-center animate-fade-in" style="animation-delay: 0.4s">
+                        <div class="order-2 md:order-1 w-full md:w-1/2 md:pr-12 text-right mb-6 md:mb-0">
+                            <h3 class="text-xl font-bold text-primary mb-2">进入希望之峰</h3>
+                            <p class="text-gray-700">
+                                以「超高校级的偶像」身份被希望之峰学园录取，本以为能在这里度过普通的校园生活，却卷入了校长黑白熊策划的「绝望游戏」。
+                            </p>
+                        </div>
+                        <div class="order-1 md:order-2 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10 shadow-lg">
+                            <i class="fa fa-graduation-cap text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- 时间点4 -->
+                    <div class="flex flex-col md:flex-row-reverse items-center animate-fade-in" style="animation-delay: 0.6s">
+                        <div class="order-2 md:order-1 w-full md:w-1/2 md:pl-12 mb-6 md:mb-0">
+                            <h3 class="text-xl font-bold text-primary mb-2">绝望中的选择</h3>
+                            <p class="text-gray-700">
+                                在「互相残杀」的游戏规则下，为了保护重要的人，她策划了一场冒险的计划，最终在命运的十字路口做出了令人惋惜的抉择，成为推动剧情的关键人物。
+                            </p>
+                        </div>
+                        <div class="order-1 md:order-2 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10 shadow-lg">
+                            <i class="fa fa-heartbreak text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-white p-8 rounded-2xl shadow-lg animate-fade-in">
+                <h3 class="text-2xl font-bold text-center mb-6">关键关系图谱</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-12">
+                    <div class="text-center">
+                        <div class="w-24 h-24 rounded-full bg-accent/50 flex items-center justify-center mx-auto mb-3">
+                            <img src="https://picsum.photos/id/64/200/200" alt="舞园沙耶香" class="w-20 h-20 rounded-full">
+                        </div>
+                        <h4 class="font-bold">舞园沙耶香</h4>
+                        <p class="text-sm text-gray-600">超高校级的偶像</p>
+                    </div>
+                    
+                    <div class="hidden md:block">
+                        <i class="fa fa-long-arrow-right text-primary text-2xl"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full bg-accent/50 flex items-center justify-center mx-auto mb-3">
+                            <img src="https://picsum.photos/id/91/200/200" alt="苗木诚" class="w-16 h-16 rounded-full">
+                        </div>
+                        <h4 class="font-bold">苗木诚</h4>
+                        <p class="text-sm text-gray-600">超高校级的幸运</p>
+                        <p class="text-xs text-gray-500 mt-1">重要友人</p>
+                    </div>
+                    
+                    <div class="hidden md:block">
+                        <i class="fa fa-long-arrow-right text-primary text-2xl"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full bg-accent/50 flex items-center justify-center mx-auto mb-3">
+                            <img src="https://picsum.photos/id/26/200/200" alt="江之岛盾子" class="w-16 h-16 rounded-full">
+                        </div>
+                        <h4 class="font-bold">江之岛盾子</h4>
+                        <p class="text-sm text-gray-600">超高校级的绝望</p>
+                        <p class="text-xs text-gray-500 mt-1">幕后黑手</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 形象画廊 -->
+    <section id="gallery" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-display font-bold text-dark mb-4">
+                    <i class="fa fa-camera text-primary mr-3"></i>形象 gallery
+                </h2>
+                <p class="max-w-2xl mx-auto text-gray-600">
+                    收录舞园沙耶香在不同场景下的经典形象，感受偶像的多样魅力
+                </p>
+                <div class="w-20 h-1 bg-primary mx-auto mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- 图片1 -->
+                <div class="group animate-fade-in">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/64/500/500" alt="舞园沙耶香制服形象" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">希望之峰学园制服</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片2 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/91/500/500" alt="舞园沙耶香舞台形象" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">「甜蜜子弹」舞台装</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片3 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/26/500/500" alt="舞园沙耶香插画形象" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">官方插画艺术图</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片4 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.3s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/65/500/500" alt="舞园沙耶香休闲形象" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">日常休闲服造型</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片5 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.4s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/237/500/500" alt="舞园沙耶香活动照片" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">粉丝见面会现场</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片6 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.5s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/96/500/500" alt="舞园沙耶香概念艺术" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">概念艺术设计图</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片7 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.6s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/342/500/500" alt="舞园沙耶香角色设定" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">角色设定原稿</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图片8 -->
+                <div class="group animate-fade-in" style="animation-delay: 0.7s">
+                    <div class="overflow-hidden rounded-xl shadow-md aspect-square">
+                        <img src="https://picsum.photos/id/177/500/500" alt="舞园沙耶香特别造型" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                            <p class="text-white">特别企划造型</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 animate-fade-in">
+                <button class="bg-primary text-white px-8 py-3 rounded-full font-medium shadow-lg hover:bg-primary/90 transition-all transform hover:-translate-y-1">
+                    加载更多图片 <i class="fa fa-refresh ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-display font-bold mb-4 flex items-center">
+                        <i class="fa fa-music mr-2 text-primary"></i>舞园沙耶香
+                    </h3>
+                    <p class="text-gray-400 mb-4">
+                        超高校级的偶像，用歌声传递希望与勇气的少女。
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-dark/50 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-dark/50 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-dark/50 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-youtube-play"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">快速导航</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#intro" class="text-gray-400 hover:text-primary transition-colors">角色简介</a></li>
+                        <li><a href="#appearance" class="text-gray-400 hover:text-primary transition-colors">外观特征</a></li>
+                        <li><a href="#personality" class="text-gray-400 hover:text-primary transition-colors">性格特质</a></li>
+                        <li><a href="#background" class="text-gray-400 hover:text-primary transition-colors">背景故事</a></li>
+                        <li><a href="#gallery" class="text-gray-400 hover:text-primary transition-colors">形象画廊</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">相关链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">《弹丸论破》官方网站</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">舞园沙耶香角色档案</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">声优资料与访谈</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">粉丝创作作品集</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">角色歌音乐专辑</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500">
+                <p>© 2025 舞园沙耶香粉丝站. 保留所有权利.</p>
+                <p class="mt-2 text-sm">本网站为非商业粉丝创作，仅用于角色介绍与交流</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg opacity-0 invisible transition-all z-50">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3', 'shadow-sm');
+            } else {
+                navbar.classList.add('py-3', 'shadow-sm');
+                navbar.classList.remove('py-2', 'shadow-md');
+            }
+            
+            // 返回顶部按钮显示/隐藏
+            const backToTop = document.getElementById('back-to-top');
+            if (window.scrollY > 300) {
+                backToTop.classList.remove('opacity-0', 'invisible');
+                backToTop.classList.add('opacity-100', 'visible');
+            } else {
+                backToTop.classList.add('opacity-0', 'invisible');
+                backToTop.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        // 移动端菜单切换
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                menuToggle.innerHTML = '<i class="fa fa-bars text-2xl"></i>';
+            } else {
+                menuToggle.innerHTML = '<i class="fa fa-times text-2xl"></i>';
+            }
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 关闭移动端菜单
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        menuToggle.innerHTML = '<i class="fa fa-bars text-2xl"></i>';
+                    }
+                }
+            });
+        });
+        
+        // 返回顶部功能
+        document.getElementById('back-to-top').addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
